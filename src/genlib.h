@@ -12,4 +12,9 @@ void *smalloc(size_t size);
 void *sfree(void *pointer);
 void *semalloc(size_t count, void *t);
 
+typedef enum _STATUS {
+	STATUS_CODE_SUCC,
+	STATUS_CODE_FAILED
+} STATUS;
+
 #endif /* GENLIB_H_ */
