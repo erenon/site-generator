@@ -39,8 +39,19 @@ void parse_fname(File *file, char fname[]) {
 			//copy extension
 			file->extension = semalloc(len-i-1, file->extension);
 			strcpy(file->extension, fname+i+1);
+
+			return;
 		}
 	}
+
+	//no . found
+	file->name = semalloc(len, file->name);
+	strcpy(file->name, fname);
+
+	file->extension = semalloc(1, file->extension);
+	file->extension[0] = '\0';
+
+	return;
 }
 
 void read_file(File *file, char fname[]) {
