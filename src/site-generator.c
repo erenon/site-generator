@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include "genlib.h"
 #include "dir.h"
+#include "generator.h"
 
 int main(int argc, char *argv[]) {
 	//read index
@@ -16,7 +17,9 @@ int main(int argc, char *argv[]) {
 
 	dir = dir_create("");
 
-	dir_print(dir);
+	generator_process_widgets(dir);
+
+	//dir_print(dir);
 
 	dir_delete(dir);
 
