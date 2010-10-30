@@ -13,18 +13,7 @@
 
 #define DIR_MAX_LINE_LENGTH 1024
 
-struct File {
-	char *name;
-	char *extension;
-	char *content;
-};
 
-struct Dir {
-	//char *path;
-	int file_to_process_count;
-	int files_count;
-	File **files;
-};
 
 void parse_fname(File *file, char fname[]) {
 	int len,i;

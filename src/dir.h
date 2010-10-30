@@ -8,8 +8,20 @@
 #ifndef DIR_H_
 #define DIR_H_
 
-typedef struct Dir Dir;
-typedef struct File File;
+typedef struct _File {
+	char *name;
+	char *extension;
+	char *content;
+} File;
+
+typedef struct _Dir {
+	//char *path;
+	int file_to_process_count;
+	int files_count;
+	File **files;
+} Dir;
+
+
 
 Dir *dir_create(char path[]);
 Dir dir_sort(Dir *dir);
