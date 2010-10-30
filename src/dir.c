@@ -25,8 +25,22 @@ struct Dir {
 	File **files;
 };
 
-void process_fname(File *file, char fname[]) {
+void parse_fname(File *file, char fname[]) {
+	int len,i;
+	len = strlen(fname);
 
+	for (i=len;i>=0;i--) {
+		if (fname[i] == '.') {
+			//copy name
+			file->name = semalloc(i, file->name);
+			strncpy(file->name, fname, i);
+			file->name[i+1] = '\0';
+
+			//copy extension
+			file->extension = semalloc(len-i-1, file->extension);
+			strcpy(file->extension, fname+i+1);
+		}
+	}
 }
 
 void read_file(File *file, char fname[]) {
@@ -51,7 +65,7 @@ void read_file(File *file, char fname[]) {
 
 	file->content[filesize] = '\0';
 
-	process_fname(file, fname);
+	parse_fname(file, fname);
 
 }
 
@@ -106,7 +120,8 @@ void dir_print(Dir *dir) {
 	printf("path: %s\nfiles:\n\n", dir->path);
 
 	for (i=0;i<dir->file_to_process_count;i++) {
-		//printf("filename: %s\n", dir->files[i]->name);
+		printf("filename: %s\n", dir->files[i]->name);
+		printf("ext: %s\n", dir->files[i]->extension);
 		printf("%s\n\n",dir->files[i]->content);
 	}
 }
