@@ -20,7 +20,7 @@ struct File {
 };
 
 struct Dir {
-	char *path;
+	//char *path;
 	int file_to_process_count;
 	File **files;
 };
@@ -117,11 +117,28 @@ Dir *dir_create(char path[]) {
 void dir_print(Dir *dir) {
 	int i;
 
-	printf("path: %s\nfiles:\n\n", dir->path);
+	//printf("path: %s\nfiles:\n\n", dir->path);
 
 	for (i=0;i<dir->file_to_process_count;i++) {
 		printf("filename: %s\n", dir->files[i]->name);
 		printf("ext: %s\n", dir->files[i]->extension);
 		printf("%s\n\n",dir->files[i]->content);
 	}
+}
+
+void file_delete(File *file) {
+	sfree(file->name);
+	sfree(file->extension);
+	sfree(file->content);
+	sfree(file);
+}
+
+void dir_delete(Dir *dir) {
+	int i;
+
+	for (i=0; i < dir->file_to_process_count; i++) {
+		file_delete(dir->files[i]);
+	}
+
+	sfree(dir);
 }

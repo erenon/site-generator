@@ -18,5 +18,7 @@ int main(int argc, char *argv[]) {
 
 	dir_print(dir);
 
+	dir_delete(dir);
+
 	return EXIT_SUCCESS;
 }
