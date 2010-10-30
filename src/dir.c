@@ -32,30 +32,32 @@ void parse_fname(File *file, char fname[]) {
 	for (i=len;i>=0;i--) {
 		if (fname[i] == '.') {
 			//copy name
-			file->name = semalloc(i, file->name);
+			file->name = (char *)smalloc((i+2) * sizeof(char));
 			strncpy(file->name, fname, i);
-			file->name[i+1] = '\0';
+			file->name[i] = '\0';
 
 			//copy extension
-			file->extension = semalloc(len-i-1, file->extension);
+			file->extension = (char *)smalloc((len-i) * sizeof(char));
 			strcpy(file->extension, fname+i+1);
+			file->extension[len-i-1] = '\0';
 
 			return;
 		}
 	}
 
 	//no . found
-	file->name = semalloc(len, file->name);
+	file->name = (char *)smalloc((len+1) * sizeof(char));
 	strcpy(file->name, fname);
+	file->name[len] = '\0';
 
-	file->extension = semalloc(1, file->extension);
+	file->extension = (char *)smalloc(1 * sizeof(char));
 	file->extension[0] = '\0';
 
 	return;
 }
 
-void read_file(File *file, char fname[]) {
-	FILE *fp;
+void read_file(File *file, char fname[], STATUS *status) {
+	FILE *fp = NULL;
 	int filesize;
 
 	//hack! trim newline;
@@ -63,33 +65,46 @@ void read_file(File *file, char fname[]) {
 
 	//TODO add error h
 	fp = fopen(fname, "r");
+	if (fp == NULL) {
+		fprintf(stderr, "Failed to read file: '%s', file skipped.\n", fname);
+		*status = STATUS_CODE_FAILED;
+		return;
+	}
 
 	//get file length
 	fseek(fp, 0, SEEK_END);
-	//TODO +1 for closing 0?
-	filesize = ftell(fp)+1;
+	filesize = ftell(fp);
 
-	file->content = semalloc(filesize, file->content);
+	file->content = (char *)smalloc(filesize+1 * sizeof(char));
 
-	rewind(fp);
-	fread(file->content, filesize-1, 1, fp);
+	if (filesize > 0) {
+		rewind(fp);
+		fread(file->content, filesize, 1, fp);
+	}
 
 	file->content[filesize] = '\0';
 
 	parse_fname(file, fname);
 
+	fclose(fp);
+
+	*status = STATUS_CODE_SUCC;
 }
 
 void read(Dir *dir) {
-	FILE *index;
+	FILE *index = NULL;
 	char file_name[DIR_MAX_LINE_LENGTH];
 	int linec=0, i;
 	char dir_index[] = "index";
+	STATUS status;
 
 	//TODO handle path
 
-	//TODO add error h
 	index = fopen(dir_index, "r");
+	if (index == NULL) {
+	    fprintf(stderr, "Failed to read index! Aborting...\n");
+	    exit(EXIT_FAILURE);
+	}
 
 	while (fgets(file_name, DIR_MAX_LINE_LENGTH, index) != NULL) {
 		linec++;
@@ -98,13 +113,20 @@ void read(Dir *dir) {
 	rewind(index);
 
 	dir->file_to_process_count = linec;
-	dir->files = semalloc(linec, dir->files);
+	dir->files = (File **)smalloc(linec * sizeof(File *));
 
 	i=0;
 	while (fgets(file_name, DIR_MAX_LINE_LENGTH, index) != NULL) {
-		dir->files[i] = (File *)semalloc(1, dir->files[i]);
-		read_file(dir->files[i], file_name);
-		i++;
+		status = STATUS_CODE_FAILED;
+
+		dir->files[i] = (File *)smalloc(sizeof(File));
+
+		read_file(dir->files[i], file_name, &status);
+		if (status == STATUS_CODE_SUCC) {
+			i++;
+		} else {
+			sfree(dir->files[i]);
+		}
 	}
 
 
@@ -114,7 +136,7 @@ void read(Dir *dir) {
 Dir *dir_create(char path[]) {
 	Dir *dir = NULL;
 
-	dir = semalloc(1, dir);
+	dir = (Dir *)smalloc(sizeof(Dir));
 
 	read(dir);
 
@@ -150,6 +172,7 @@ void dir_delete(Dir *dir) {
 	for (i=0; i < dir->file_to_process_count; i++) {
 		file_delete(dir->files[i]);
 	}
+	sfree(dir->files);
 
 	sfree(dir);
 }
