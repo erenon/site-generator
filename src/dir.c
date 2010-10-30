@@ -22,6 +22,7 @@ struct File {
 struct Dir {
 	//char *path;
 	int file_to_process_count;
+	int files_count;
 	File **files;
 };
 
@@ -56,9 +57,10 @@ void parse_fname(File *file, char fname[]) {
 	return;
 }
 
-void read_file(File *file, char fname[], STATUS *status) {
+File *read_file(char fname[]) {
 	FILE *fp = NULL;
 	int filesize;
+	File *file;
 
 	//hack! trim newline;
 	fname[strlen(fname)-1] = '\0';
@@ -67,13 +69,15 @@ void read_file(File *file, char fname[], STATUS *status) {
 	fp = fopen(fname, "r");
 	if (fp == NULL) {
 		fprintf(stderr, "Failed to read file: '%s', file skipped.\n", fname);
-		*status = STATUS_CODE_FAILED;
-		return;
+		//*status = STATUS_CODE_FAILED;
+		return NULL;
 	}
 
 	//get file length
 	fseek(fp, 0, SEEK_END);
 	filesize = ftell(fp);
+
+	file = (File *)smalloc(sizeof(File));
 
 	file->content = (char *)smalloc(filesize+1 * sizeof(char));
 
@@ -88,7 +92,7 @@ void read_file(File *file, char fname[], STATUS *status) {
 
 	fclose(fp);
 
-	*status = STATUS_CODE_SUCC;
+	return file;
 }
 
 void read(Dir *dir) {
@@ -96,7 +100,8 @@ void read(Dir *dir) {
 	char file_name[DIR_MAX_LINE_LENGTH];
 	int linec=0, i;
 	char dir_index[] = "index";
-	STATUS status;
+	//STATUS status;
+	File *cfile = NULL;
 
 	//TODO handle path
 
@@ -117,15 +122,15 @@ void read(Dir *dir) {
 
 	i=0;
 	while (fgets(file_name, DIR_MAX_LINE_LENGTH, index) != NULL) {
-		status = STATUS_CODE_FAILED;
+		//status = STATUS_CODE_FAILED;
 
-		dir->files[i] = (File *)smalloc(sizeof(File));
+		//dir->files[i] = (File *)smalloc(sizeof(File));
 
-		read_file(dir->files[i], file_name, &status);
-		if (status == STATUS_CODE_SUCC) {
+		cfile = read_file(file_name);
+		if (cfile) {
+			dir->files[i] = cfile;
+			dir->files_count++;
 			i++;
-		} else {
-			sfree(dir->files[i]);
 		}
 	}
 
@@ -137,6 +142,9 @@ Dir *dir_create(char path[]) {
 	Dir *dir = NULL;
 
 	dir = (Dir *)smalloc(sizeof(Dir));
+
+	dir->file_to_process_count = 0;
+	dir->files_count = 0;
 
 	read(dir);
 
@@ -152,7 +160,7 @@ void dir_print(Dir *dir) {
 
 	//printf("path: %s\nfiles:\n\n", dir->path);
 
-	for (i=0;i<dir->file_to_process_count;i++) {
+	for (i=0; i < dir->files_count; i++) {
 		printf("filename: %s\n", dir->files[i]->name);
 		printf("ext: %s\n", dir->files[i]->extension);
 		printf("%s\n\n",dir->files[i]->content);
@@ -169,7 +177,7 @@ void file_delete(File *file) {
 void dir_delete(Dir *dir) {
 	int i;
 
-	for (i=0; i < dir->file_to_process_count; i++) {
+	for (i=0; i < dir->files_count; i++) {
 		file_delete(dir->files[i]);
 	}
 	sfree(dir->files);
