@@ -29,6 +29,9 @@ void *sfree(void *pointer) {
 	}
 }
 
+/**
+ * @depracated
+ */
 void *semalloc(size_t count, void *p) {
 	return (typeof(*p) *)smalloc(count*sizeof(typeof(*p)));
 }
