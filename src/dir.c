@@ -44,8 +44,6 @@ void read_file(File *file, char fname[]) {
 	//TODO +1 for closing 0?
 	filesize = ftell(fp)+1;
 
-	file = semalloc(1, file);
-
 	file->content = semalloc(filesize, file->content);
 
 	rewind(fp);
@@ -79,6 +77,7 @@ void read(Dir *dir) {
 
 	i=0;
 	while (fgets(file_name, DIR_MAX_LINE_LENGTH, index) != NULL) {
+		dir->files[i] = (File *)semalloc(1, dir->files[i]);
 		read_file(dir->files[i], file_name);
 		i++;
 	}
@@ -95,4 +94,19 @@ Dir *dir_create(char path[]) {
 	read(dir);
 
 	return dir;
+}
+
+/**
+ * debug/test function
+ * print dir contents
+ */
+void dir_print(Dir *dir) {
+	int i;
+
+	printf("path: %s\nfiles:\n\n", dir->path);
+
+	for (i=0;i<dir->file_to_process_count;i++) {
+		//printf("filename: %s\n", dir->files[i]->name);
+		printf("%s\n\n",dir->files[i]->content);
+	}
 }

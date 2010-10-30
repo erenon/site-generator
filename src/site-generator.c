@@ -16,5 +16,7 @@ int main(int argc, char *argv[]) {
 
 	dir = dir_create("");
 
+	dir_print(dir);
+
 	return EXIT_SUCCESS;
 }

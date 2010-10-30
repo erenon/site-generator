@@ -13,6 +13,7 @@ typedef struct File File;
 
 Dir *dir_create(char path[]);
 Dir dir_sort(Dir *dir);
+void dir_print(Dir *dir);
 void dir_delete(Dir *dir);
 
 #endif /* DIR_H_ */
