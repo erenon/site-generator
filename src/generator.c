@@ -33,10 +33,8 @@ void format_text_replace_bb(char **text, char bbstart, char bbend, char *htmlsta
 				strcat(newtext, *text+i+1);
 
 				sfree(*text);
-				*text = (char *)smalloc((strlen(newtext)+1) * sizeof(char));
-				*text[0] = '\0';
-				strcpy(*text, newtext);
-				sfree(newtext);
+				*text = newtext;
+				newtext = NULL;
 
 				//reset
 				tlength = strlen(*text);
@@ -120,7 +118,7 @@ void format_text_link(char **text) {
 			strcat(newtext, htmlse);
 			strncat(newtext, *text+se+1, i-se-1);
 			strcat(newtext, htmle);
-			strcat(newtext, *text+i+htmlelen);
+			strcat(newtext, *text+i+bbelen);
 
 			newtext[tlen + addlen - 1] = '\0';
 
@@ -135,10 +133,65 @@ void format_text_link(char **text) {
 	}
 }
 
+void format_text_img(char **text) {
+	char *bbs = "[img:",
+		 bbe = ']',
+		 *htmls = "<img src=\"",
+		 *htmle = "\" />",
+		 *newtext = NULL;
+	int i, bbslen, htmlslen, htmlelen, tlen, addlen,
+		start;
+
+	bbslen = strlen(bbs);
+	htmlslen = strlen(htmls);
+	htmlelen = strlen(htmle);
+	tlen = strlen(*text);
+
+	addlen = bbslen - 1 + htmlslen + htmlelen;
+
+	start = 0;
+
+	for (i = 0; i < tlen; i++) {
+		if (
+			!start &&
+			memcmp(*text+i, bbs, bbslen) == 0
+		) {
+			//opening tag found
+			start = i;
+		} else if (
+			start &&
+			(*text)[i] == bbe
+		) {
+			//closing tag
+			//replace
+			newtext = (char *)smalloc((tlen + addlen) * sizeof(char *));
+			newtext[0] = '\0';
+
+			strncat(newtext, *text, start);
+			strcat(newtext, htmls);
+			strncat(newtext, *text+start+bbslen, i-start-bbslen-1);
+			strcat(newtext, htmle);
+			strcat(newtext, *text+i+1);
+
+			newtext[tlen + addlen - 1] = '\0';
+
+			sfree(*text);
+			*text = newtext;
+			newtext = NULL;
+
+			//reset
+			start = 0;
+			tlen = strlen(*text);
+		}
+	}
+
+}
+
 void format_text(char **text) {
 	format_text_italic(text);
 	format_text_bold(text);
 	format_text_link(text);
+	format_text_img(text);
 }
 
 void process_widget(File *widget) {
