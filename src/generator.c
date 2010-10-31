@@ -12,13 +12,11 @@
  * Replaces paired bb code with html
  * int the given text. The change is in place.
  *
- * @param char **text Source and target in the same time
- * @param char bbstart Opening tag to replace
- * @param char bbend Closing tag to replace
- * @param char *htmlstart Opening html tag
- * @param char *htmlend Closing html tag
- *
- * @example format_text_replace_bb.c
+ * @param[in,out] **text Source and target in the same time
+ * @param[in] bbstart Opening tag to replace
+ * @param[in] bbend Closing tag to replace
+ * @param[in] *htmlstart Opening html tag
+ * @param[in] *htmlend Closing html tag
  */
 static void format_text_replace_bb(char **text, char bbstart, char bbend, char *htmlstart, char *htmlend) {
 	int i, start=0, tlength, addlen;
@@ -58,7 +56,7 @@ static void format_text_replace_bb(char **text, char bbstart, char bbend, char *
 /**
  * Makes emphasized text from underscore delimited text
  *
- * @param char **text Source to search in
+ * @param **text Source to search in
  *
  * @see format_text_replace_bb
  */
@@ -75,7 +73,7 @@ static void format_text_italic(char **text) {
 /**
  * Makes bold text from star (*) delimited text
  *
- * @param char **text Source to search in
+ * @param **text Source to search in
  *
  * @see format_text_replace_bb
  */
@@ -92,7 +90,7 @@ static void format_text_bold(char **text) {
 /**
  * Replaces bb coded links to html links.
  *
- * @param char **text Source to search in
+ * @param **text Source to search in
  *
  * @example format_text_link.c
  *
@@ -168,7 +166,7 @@ static void format_text_link(char **text) {
 /**
  * Replaces bb coded img tags to html tags.
  *
- * @param char **text Source to search in
+ * @param **text Source to search in
  *
  * @todo handle predefined separated img dir
  */
@@ -230,7 +228,7 @@ static void format_text_img(char **text) {
  * Applies the available text format methods to
  * the given text.
  *
- * @param char **text
+ * @param **text
  */
 static void format_text(char **text) {
 	format_text_italic(text);
@@ -242,7 +240,7 @@ static void format_text(char **text) {
 /**
  * Process the given file as a widget
  *
- * @param File *widget file to process
+ * @param *widget file to process
  * @todo remove testing prints
  */
 static void process_widget(File *widget) {
@@ -256,9 +254,9 @@ static void process_widget(File *widget) {
  * and applies the given callback to the file
  * if it's extension matches to the given extension.
  *
- * @param Dir *dir directory to iterate over
- * @param char *ext extension to look for
- * @param void (*callback)(File *) callback function
+ * @param *dir directory to iterate over
+ * @param *ext extension to look for
+ * @param *callback callback function
  */
 static void dir_map_by_ext(Dir *dir, char *ext, void (*callback)(File *)) {
 	int i;
@@ -273,7 +271,7 @@ static void dir_map_by_ext(Dir *dir, char *ext, void (*callback)(File *)) {
 /**
  * Processes all the widget files in the given dir.
  *
- * @param Dir *dir
+ * @param *dir
  */
 void generator_process_widgets(Dir *dir) {
 	dir_map_by_ext(dir, "widget", process_widget);
