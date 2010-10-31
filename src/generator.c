@@ -24,7 +24,7 @@ void format_text_replace_bb(char **text, char bbstart, char bbend, char *htmlsta
 		if ((*text)[i] == bbstart) {
 			if (start) {
 				//replace
-				newtext = (char *)malloc((tlength+addlen-1) * sizeof(char));
+				newtext = (char *)smalloc((tlength+addlen-1) * sizeof(char));
 				newtext[0] = '\0';
 				strncat(newtext, *text, start);
 				strcat(newtext, htmlstart);
@@ -32,10 +32,8 @@ void format_text_replace_bb(char **text, char bbstart, char bbend, char *htmlsta
 				strcat(newtext, htmlend);
 				strcat(newtext, *text+i+1);
 
-				//newtext[tlength+addlen-2] = '\0';
-
 				sfree(*text);
-				*text = (char *)malloc((strlen(newtext)+1) * sizeof(char));
+				*text = (char *)smalloc((strlen(newtext)+1) * sizeof(char));
 				*text[0] = '\0';
 				strcpy(*text, newtext);
 				sfree(newtext);
@@ -70,15 +68,83 @@ void format_text_bold(char **text) {
 	);
 }
 
+void format_text_link(char **text) {
+	char *bbss = "[link:",
+		 bbse = ']',
+		 *bbe = "[/l]",
+		 *htmlss = "<a href=\"",
+		 *htmlse = "\">",
+		 *htmle = "</a>",
+		 *newtext = NULL;
+	int ss = 0, se = 0, i,
+		bbsslen, bbelen, htmlsslen, htmlselen, htmlelen,
+		tlen, addlen;
+
+	bbsslen = strlen(bbss);
+	bbelen = strlen(bbe);
+
+	htmlsslen = strlen(htmlss);
+	htmlselen = strlen(htmlse);
+	htmlelen = strlen(htmle);
+
+	tlen = strlen(*text);
+	addlen = htmlsslen + htmlselen + htmlelen - bbsslen - 1 - bbelen;
+
+	for (i=0; i < tlen; i++) {
+		if (
+			!ss &&
+		    memcmp(*text+i, bbss, bbsslen) == 0
+		) {
+			//opening tag first part found
+			ss = i;
+		} else if (
+			ss &&
+			!se &&
+			(*text)[i] == bbse
+		) {
+			//end of the opening tag
+			se = i;
+		} else if (
+			ss &&
+			se &&
+			memcmp(*text+i, bbe, bbelen) == 0
+		) {
+			//closing tag found
+			//replace
+			newtext = (char *)smalloc((tlen + addlen) * sizeof(char *));
+			newtext[0] = '\0';
+
+			strncat(newtext, *text, ss);
+			strcat(newtext, htmlss);
+			strncat(newtext, *text+ss+bbsslen, se-ss-bbsslen);
+			strcat(newtext, htmlse);
+			strncat(newtext, *text+se+1, i-se-1);
+			strcat(newtext, htmle);
+			strcat(newtext, *text+i+htmlelen);
+
+			newtext[tlen + addlen - 1] = '\0';
+
+			sfree(*text);
+			*text = newtext;
+			newtext = NULL;
+
+			//reset
+			ss = se = 0;
+			tlen = strlen(*text);
+		}
+	}
+}
+
 void format_text(char **text) {
 	format_text_italic(text);
 	format_text_bold(text);
+	format_text_link(text);
 }
 
 void process_widget(File *widget) {
 	printf("%s\n", widget->name);
 	format_text(&widget->content);
-	printf("%s\n", widget->content);
+	printf("%s\n\t===\t\n", widget->content);
 }
 
 void dir_map_by_ext(Dir *dir, char *ext, void (*callback)(File *)) {
@@ -92,6 +158,5 @@ void dir_map_by_ext(Dir *dir, char *ext, void (*callback)(File *)) {
 }
 
 void generator_process_widgets(Dir *dir) {
-	//void *callback = process_widget;
 	dir_map_by_ext(dir, "widget", process_widget);
 }
