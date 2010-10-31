@@ -6,6 +6,11 @@
 #define DIR_H_
 
 /**
+ * Max length of the dir path
+ */
+#define DIR_MAX_PATH_LENGTH 1024
+
+/**
  * Represents a file on the filesystem
  */
 typedef struct _File {
@@ -20,7 +25,7 @@ typedef struct _File {
  * listing the contained file to read
  */
 typedef struct _Dir {
-	//char *path;
+	char *path;					/**< path to read from, relative to the execution */
 	int file_to_process_count;	/**< line count of the index file */
 	int files_count;		    /**< found indexed file count */
 	File **files;				/**< pointers to the read files */

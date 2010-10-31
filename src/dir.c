@@ -13,7 +13,6 @@
  */
 #define DIR_MAX_LINE_LENGTH 1024
 
-
 /**
  * Parses file name
  *
@@ -60,10 +59,12 @@ static void parse_fname(File *file, char *fname) {
  * Reads a file based on the given filename
  * into a File. Prints error if file not found.
  *
+ * @param *path Path to the file
  * @param *fname Name of the file to read
  * @return File* or NULL if file not found.
  */
-static File *read_file(char *fname) {
+static File *read_file(char *path, char *fname) {
+	char file_path[DIR_MAX_PATH_LENGTH];
 	FILE *fp = NULL;
 	int filesize;
 	File *file;
@@ -71,11 +72,12 @@ static File *read_file(char *fname) {
 	//hack! trim newline;
 	fname[strlen(fname)-1] = '\0';
 
-	//TODO add error h
-	fp = fopen(fname, "r");
+	strcpy(file_path, path);
+	strcat(file_path, fname);
+
+	fp = fopen(file_path, "r");
 	if (fp == NULL) {
 		fprintf(stderr, "Failed to read file: '%s', file skipped.\n", fname);
-		//*status = STATUS_CODE_FAILED;
 		return NULL;
 	}
 
@@ -114,10 +116,11 @@ static void read(Dir *dir) {
 	FILE *index = NULL;
 	char file_name[DIR_MAX_LINE_LENGTH];
 	int linec=0, i;
-	char dir_index[] = "index";
+	char dir_index[DIR_MAX_PATH_LENGTH];
 	File *cfile = NULL;
 
-	//TODO handle path
+	strcpy(dir_index, dir->path);
+	strcat(dir_index, "index");
 
 	index = fopen(dir_index, "r");
 	if (index == NULL) {
@@ -136,7 +139,7 @@ static void read(Dir *dir) {
 
 	i=0;
 	while (fgets(file_name, DIR_MAX_LINE_LENGTH, index) != NULL) {
-		cfile = read_file(file_name);
+		cfile = read_file(dir->path, file_name);
 		if (cfile) {
 			dir->files[i] = cfile;
 			dir->files_count++;
@@ -153,7 +156,6 @@ static void read(Dir *dir) {
  * resets its parameters,
  * and call read to read the whole dir.
  *
- * @todo handle path
  * @param *path Path to read from. Not implemented.
  * @return Dir* dir instance
  */
@@ -161,6 +163,9 @@ Dir *dir_create(char *path) {
 	Dir *dir = NULL;
 
 	dir = (Dir *)smalloc(sizeof(Dir));
+
+	dir->path = (char *)smalloc((strlen(path)+1) * sizeof(char));
+	strcpy(dir->path, path);
 
 	dir->file_to_process_count = 0;
 	dir->files_count = 0;
@@ -207,6 +212,8 @@ static void file_delete(File *file) {
  */
 void dir_delete(Dir *dir) {
 	int i;
+
+	sfree(dir->path);
 
 	for (i=0; i < dir->files_count; i++) {
 		file_delete(dir->files[i]);
