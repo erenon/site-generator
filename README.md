@@ -9,8 +9,8 @@ A lehetséges típusok a következőek:
  * __Page__:
 A honlap egy oldalát reprezentálja. Lehetőség van a tartalom formázására, a program képes a következő jelölők felismerésére és HTML kóddá alakítására:
         
-    * _dőlt_
-    * *vastag*
+    * \_dőlt_
+    * \*vastag*
     * [link:oldal_neve]
     * [img:kep_neve.jpg]
     
@@ -26,13 +26,13 @@ A page-hez hasonlóan formázott, akár HTML kódokat tartalmazó szöveges fáj
  * __Layout__:
     Egy általános séma, mely biztosítja az egységes megjelenést, és a HTML szabványnak megfelelő keretet ad minden oldalnak. A program definiál alapértelmezett sablont, de lehetőség van saját meghatározására is. Tartalmazhat helyörzőket (palceholder), melyek a következőek:
     
-    * {navigation}:
+    * `{navigation}`:
     Felsorolás formájában kilistázza az összes beolvasott page nevét, linkelve azokat a megfelelő oldalra.
     
-    * {content}:
+    * `{content}`:
     Beilleszti az aktuális oldalt.
     
-    * {widget:widget_neve}:
+    * `{widget:widget_neve}`:
     Beilleszti a megnevezett widget tartalmát.
     
     _Név formátuma:_ layout
