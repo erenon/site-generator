@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "libgen.h"
+#include "genlib.h"
 #include "dir.h"
 
 void format_text_replace_bb(char **text, char bbstart, char bbend, char *htmlstart, char *htmlend) {
