@@ -1,8 +1,5 @@
 /*
- * site-generator.c
- *
- *  Created on: 2010.10.24.
- *      Author: erenon
+ * @author erenon
  */
 
 #include <stdio.h>

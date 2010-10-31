@@ -1,13 +1,18 @@
 /*
- * genlib.c
- *
- *  Created on: 2010.10.29.
- *      Author: erenon
+ * @author erenon
  */
 
 #include <stdlib.h>
 #include <stdio.h>
 
+/**
+ * Allocates a requested amount of memory
+ * Checks whether malloc was succesful or not.
+ *
+ * @warning Aborts if out of memory
+ *
+ * @param size requested memory size
+ */
 void *smalloc(size_t size) {
 	void *p = NULL;
 	p = malloc(size);
@@ -20,6 +25,12 @@ void *smalloc(size_t size) {
 	return p;
 }
 
+/**
+ * Frees the given pointer
+ * and sets it's value to null.
+ *
+ * Prints error if null pointer given
+ */
 void *sfree(void *pointer) {
 	if (pointer != NULL) {
 		free(pointer);
@@ -30,7 +41,7 @@ void *sfree(void *pointer) {
 }
 
 /**
- * @depracated
+ * @deprecated Useless without typeof
  */
 void *semalloc(size_t count, void *p) {
 	return (typeof(*p) *)smalloc(count*sizeof(typeof(*p)));

@@ -1,8 +1,5 @@
 /*
- * generator.c
- *
- *  Created on: 2010.10.30.
- *      Author: erenon
+ * @author erenon
  */
 
 #include <stdio.h>
@@ -11,7 +8,19 @@
 #include "genlib.h"
 #include "dir.h"
 
-void format_text_replace_bb(char **text, char bbstart, char bbend, char *htmlstart, char *htmlend) {
+/**
+ * Replaces paired bb code with html
+ * int the given text. The change is in place.
+ *
+ * @param char **text Source and target in the same time
+ * @param char bbstart Opening tag to replace
+ * @param char bbend Closing tag to replace
+ * @param char *htmlstart Opening html tag
+ * @param char *htmlend Closing html tag
+ *
+ * @example format_text_replace_bb.c
+ */
+static void format_text_replace_bb(char **text, char bbstart, char bbend, char *htmlstart, char *htmlend) {
 	int i, start=0, tlength, addlen;
 	char *newtext = NULL;
 
@@ -46,7 +55,14 @@ void format_text_replace_bb(char **text, char bbstart, char bbend, char *htmlsta
 	}
 }
 
-void format_text_italic(char **text) {
+/**
+ * Makes emphasized text from underscore delimited text
+ *
+ * @param char **text Source to search in
+ *
+ * @see format_text_replace_bb
+ */
+static void format_text_italic(char **text) {
 	format_text_replace_bb(
 			text,
 			'_',
@@ -56,7 +72,14 @@ void format_text_italic(char **text) {
 	);
 }
 
-void format_text_bold(char **text) {
+/**
+ * Makes bold text from star (*) delimited text
+ *
+ * @param char **text Source to search in
+ *
+ * @see format_text_replace_bb
+ */
+static void format_text_bold(char **text) {
 	format_text_replace_bb(
 		text,
 		'*',
@@ -66,7 +89,16 @@ void format_text_bold(char **text) {
 	);
 }
 
-void format_text_link(char **text) {
+/**
+ * Replaces bb coded links to html links.
+ *
+ * @param char **text Source to search in
+ *
+ * @example format_text_link.c
+ *
+ * @todo handle local and remote links
+ */
+static void format_text_link(char **text) {
 	char *bbss = "[link:",
 		 bbse = ']',
 		 *bbe = "[/l]",
@@ -133,7 +165,14 @@ void format_text_link(char **text) {
 	}
 }
 
-void format_text_img(char **text) {
+/**
+ * Replaces bb coded img tags to html tags.
+ *
+ * @param char **text Source to search in
+ *
+ * @todo handle predefined separated img dir
+ */
+static void format_text_img(char **text) {
 	char *bbs = "[img:",
 		 bbe = ']',
 		 *htmls = "<img src=\"",
@@ -187,20 +226,41 @@ void format_text_img(char **text) {
 
 }
 
-void format_text(char **text) {
+/**
+ * Applies the available text format methods to
+ * the given text.
+ *
+ * @param char **text
+ */
+static void format_text(char **text) {
 	format_text_italic(text);
 	format_text_bold(text);
 	format_text_link(text);
 	format_text_img(text);
 }
 
-void process_widget(File *widget) {
+/**
+ * Process the given file as a widget
+ *
+ * @param File *widget file to process
+ * @todo remove testing prints
+ */
+static void process_widget(File *widget) {
 	printf("%s\n", widget->name);
 	format_text(&widget->content);
 	printf("%s\n\t===\t\n", widget->content);
 }
 
-void dir_map_by_ext(Dir *dir, char *ext, void (*callback)(File *)) {
+/**
+ * Iterates over the given dir
+ * and applies the given callback to the file
+ * if it's extension matches to the given extension.
+ *
+ * @param Dir *dir directory to iterate over
+ * @param char *ext extension to look for
+ * @param void (*callback)(File *) callback function
+ */
+static void dir_map_by_ext(Dir *dir, char *ext, void (*callback)(File *)) {
 	int i;
 
 	for (i=0; i < dir->files_count; i++) {
@@ -210,6 +270,11 @@ void dir_map_by_ext(Dir *dir, char *ext, void (*callback)(File *)) {
 	}
 }
 
+/**
+ * Processes all the widget files in the given dir.
+ *
+ * @param Dir *dir
+ */
 void generator_process_widgets(Dir *dir) {
 	dir_map_by_ext(dir, "widget", process_widget);
 }

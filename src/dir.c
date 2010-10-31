@@ -1,8 +1,5 @@
 /*
- * dir.c
- *
- *  Created on: 2010.10.24.
- *      Author: erenon
+ * @author erenon
  */
 
 #include <stdio.h>
@@ -11,11 +8,24 @@
 #include "genlib.h"
 #include "dir.h"
 
+/**
+ * Max length of indexed file names
+ */
 #define DIR_MAX_LINE_LENGTH 1024
 
 
-
-void parse_fname(File *file, char fname[]) {
+/**
+ * Parses file name
+ *
+ * Explodes the full name at the last dot,
+ * and stores the parts as the name and the extension
+ * of the given file.
+ * If no dot found, extension will be empty.
+ *
+ * @param *file
+ * @param fname[] name to process
+ */
+static void parse_fname(File *file, char *fname) {
 	int len,i;
 	len = strlen(fname);
 
@@ -35,7 +45,7 @@ void parse_fname(File *file, char fname[]) {
 		}
 	}
 
-	//no . found
+	//no dot found
 	file->name = (char *)smalloc((len+1) * sizeof(char));
 	strcpy(file->name, fname);
 	file->name[len] = '\0';
@@ -46,7 +56,14 @@ void parse_fname(File *file, char fname[]) {
 	return;
 }
 
-File *read_file(char fname[]) {
+/**
+ * Reads a file based on the given filename
+ * into a File. Prints error if file not found.
+ *
+ * @param *fname Name of the file to read
+ * @return File* or NULL if file not found.
+ */
+static File *read_file(char *fname) {
 	FILE *fp = NULL;
 	int filesize;
 	File *file;
@@ -84,12 +101,20 @@ File *read_file(char fname[]) {
 	return file;
 }
 
-void read(Dir *dir) {
+/**
+ * Reads the given dir index file,
+ * and calls read_file to read the indexed files
+ * as well.
+ *
+ * @warning Aborts the execution if no index found.
+ *
+ * @param *dir Dir to read
+ */
+static void read(Dir *dir) {
 	FILE *index = NULL;
 	char file_name[DIR_MAX_LINE_LENGTH];
 	int linec=0, i;
 	char dir_index[] = "index";
-	//STATUS status;
 	File *cfile = NULL;
 
 	//TODO handle path
@@ -111,10 +136,6 @@ void read(Dir *dir) {
 
 	i=0;
 	while (fgets(file_name, DIR_MAX_LINE_LENGTH, index) != NULL) {
-		//status = STATUS_CODE_FAILED;
-
-		//dir->files[i] = (File *)smalloc(sizeof(File));
-
 		cfile = read_file(file_name);
 		if (cfile) {
 			dir->files[i] = cfile;
@@ -127,7 +148,16 @@ void read(Dir *dir) {
 	fclose(index);
 }
 
-Dir *dir_create(char path[]) {
+/**
+ * Creates a Dir instance,
+ * resets its parameters,
+ * and call read to read the whole dir.
+ *
+ * @todo handle path
+ * @param *path Path to read from. Not implemented.
+ * @return Dir* dir instance
+ */
+Dir *dir_create(char *path) {
 	Dir *dir = NULL;
 
 	dir = (Dir *)smalloc(sizeof(Dir));
@@ -141,8 +171,8 @@ Dir *dir_create(char path[]) {
 }
 
 /**
- * debug/test function
- * print dir contents
+ * Prints the contents of the dir
+ * Debug purposes only
  */
 void dir_print(Dir *dir) {
 	int i;
@@ -156,13 +186,25 @@ void dir_print(Dir *dir) {
 	}
 }
 
-void file_delete(File *file) {
+/**
+ * Frees the dynamic parts of the given file,
+ * and finally the given file itself.
+ *
+ * @param *file file to free
+ */
+static void file_delete(File *file) {
 	sfree(file->name);
 	sfree(file->extension);
 	sfree(file->content);
 	sfree(file);
 }
 
+/**
+ * Frees all the files of the given dir,
+ * and the dir itself.
+ *
+ * @param *dir dir to free
+ */
 void dir_delete(Dir *dir) {
 	int i;
 
