@@ -11,36 +11,37 @@
 #include "libgen.h"
 #include "dir.h"
 
-//TODO nagyon késő van. itt a címzett területet vesszük át, nem a pointert, több csillag vagy and kéne, fix holnap. jo8
-void format_text_replace_bb(char *text, char bbstart, char bbend, char *htmlstart, char *htmlend) {
+void format_text_replace_bb(char **text, char bbstart, char bbend, char *htmlstart, char *htmlend) {
 	int i, start=0, tlength, addlen;
 	char *newtext = NULL;
 
-	tlength = strlen(text);
+	tlength = strlen(*text);
 
 	//additional length with each pair of html tags
 	addlen = strlen(htmlstart)+ strlen(htmlend);
 
 	for(i = 0; i < tlength; i++) {
-		if (text[i] == bbstart) {
+		if ((*text)[i] == bbstart) {
 			if (start) {
 				//replace
-				newtext = (char *)malloc((tlength+addlen) * sizeof(char));
-				strncpy(newtext, text, start);
+				newtext = (char *)malloc((tlength+addlen-1) * sizeof(char));
+				newtext[0] = '\0';
+				strncat(newtext, *text, start);
 				strcat(newtext, htmlstart);
-				strncat(newtext, text+start+1, i-start-1);
+				strncat(newtext, *text+start+1, i-start-1);
 				strcat(newtext, htmlend);
-				strcat(newtext, text+i+1);
+				strcat(newtext, *text+i+1);
 
 				//newtext[tlength+addlen-2] = '\0';
 
-				sfree(text);
-				text = (char *)malloc(strlen(newtext) * sizeof(char));
-				strcpy(text, newtext);
+				sfree(*text);
+				*text = (char *)malloc((strlen(newtext)+1) * sizeof(char));
+				*text[0] = '\0';
+				strcpy(*text, newtext);
 				sfree(newtext);
 
-				tlength = strlen(text);
-				//reset start
+				//reset
+				tlength = strlen(*text);
 				start = 0;
 			} else {
 				start = i;
@@ -49,7 +50,7 @@ void format_text_replace_bb(char *text, char bbstart, char bbend, char *htmlstar
 	}
 }
 
-void format_text_italic(char *text) {
+void format_text_italic(char **text) {
 	format_text_replace_bb(
 			text,
 			'_',
@@ -59,13 +60,24 @@ void format_text_italic(char *text) {
 	);
 }
 
-void format_text(char *text) {
+void format_text_bold(char **text) {
+	format_text_replace_bb(
+		text,
+		'*',
+		'*',
+		"<strong>",
+		"</strong>"
+	);
+}
+
+void format_text(char **text) {
 	format_text_italic(text);
+	format_text_bold(text);
 }
 
 void process_widget(File *widget) {
 	printf("%s\n", widget->name);
-	format_text(widget->content);
+	format_text(&widget->content);
 	printf("%s\n", widget->content);
 }
 
