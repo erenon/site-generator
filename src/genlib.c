@@ -38,6 +38,8 @@ void *sfree(void *pointer) {
 	} else {
 		fprintf(stderr, "Freeing NULL pointer! Do nothing.\n");
 	}
+
+	return 0;
 }
 
 /**
