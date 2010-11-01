@@ -29,6 +29,7 @@ typedef struct _Dir {
 	int file_to_process_count;	/**< line count of the index file */
 	int files_count;		    /**< found indexed file count */
 	File **files;				/**< pointers to the read files */
+	int layout_index;			/**< index of the layout file in the files array */
 } Dir;
 
 Dir *dir_create(char path[]);

@@ -1,5 +1,8 @@
 /*
  * @author erenon
+ *
+ * @todo a csereberélő fgvények megfektethetőek, ha
+ * a csere is tartalmaz cserélendőt. (?)
  */
 
 #include <stdio.h>
@@ -241,12 +244,99 @@ static void format_text(char **text) {
  * Process the given file as a widget
  *
  * @param *widget file to process
- * @todo remove testing prints
  */
 static void process_widget(File *widget) {
-	printf("%s\n", widget->name);
 	format_text(&widget->content);
-	printf("%s\n\t===\t\n", widget->content);
+}
+
+/**
+ * @todo use enum instead of magic numbers
+ */
+static int has_layout(Dir *dir) {
+	int i;
+	if (dir->layout_index == -2) {
+		dir->layout_index = -1;
+
+		for(i=0; i < dir->files_count; i++) {
+			if (strcmp(dir->files[i]->name, "layout") == 0) {
+				dir->layout_index = i;
+			}
+		}
+	}
+
+	return (dir->layout_index >= 0) ? 1 : 0;
+}
+
+static void replace_placeholder(char **layout, char *placeholder, char *replaceto) {
+	int i, tlen, placelen, addlen;
+	char *newlayout = NULL;
+
+	tlen = strlen(*layout);
+	placelen = strlen(placeholder);
+	addlen = strlen(replaceto) - placelen;
+
+	for (i=0; i < tlen; i++) {
+		if ((*layout)[i] == placeholder[0]) {
+			if (memcmp(*layout+i, placeholder, placelen) == 0) {
+				//replace
+				newlayout = (char *)smalloc((tlen+addlen+1) * sizeof(char));
+				newlayout[0] = '\0';
+
+				strncat(newlayout, *layout, i);
+				strcat(newlayout, replaceto);
+				strcat(newlayout, *layout+i+placelen);
+
+				sfree(*layout);
+				*layout = newlayout;
+				newlayout = NULL;
+
+				//reset
+				tlen = strlen(*layout);
+			}
+		}
+	}
+}
+
+/*
+ * @todo handle {navigation}
+ */
+static void process_layout(Dir *dir) {
+	int i;
+	char **layout;
+	char *placeholder;
+
+	if (has_layout(dir)) {
+		layout = &(dir->files[dir->layout_index])->content;
+	} else {
+		return;
+	}
+
+	format_text_link(layout);
+	format_text_img(layout);
+
+	for (i=0; i < dir->files_count; i++) {
+		if (strcmp(dir->files[i]->extension, "widget") == 0) {
+			placeholder = (char *)smalloc(
+					(strlen("{widget:")+strlen(dir->files[i]->name)+2) *
+					sizeof(char)
+			);
+			strcpy(placeholder, "{widget:");
+			strcat(placeholder, dir->files[i]->name);
+			strcat(placeholder, "}");
+
+			replace_placeholder(
+					layout,
+					placeholder,
+					dir->files[i]->content
+			);
+
+			sfree(placeholder);
+		}
+	}
+}
+
+static void process_page(File *page) {
+	format_text(&page->content);
 }
 
 /**
@@ -275,4 +365,12 @@ static void dir_map_by_ext(Dir *dir, char *ext, void (*callback)(File *)) {
  */
 void generator_process_widgets(Dir *dir) {
 	dir_map_by_ext(dir, "widget", process_widget);
+}
+
+void generator_process_layout(Dir *dir) {
+	process_layout(dir);
+}
+
+void generator_process_pages(Dir *dir) {
+	dir_map_by_ext(dir, "page", process_page);
 }

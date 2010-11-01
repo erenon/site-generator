@@ -169,6 +169,7 @@ Dir *dir_create(char *path) {
 
 	dir->file_to_process_count = 0;
 	dir->files_count = 0;
+	dir->layout_index = -2;
 
 	read(dir);
 
