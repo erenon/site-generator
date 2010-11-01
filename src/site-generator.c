@@ -11,17 +11,21 @@
 
 int main(int argc, char *argv[]) {
 	Dir *dir;
+	char path[DIR_MAX_PATH_LENGTH];
 
-	if (argc < 2) {
-		fprintf(stderr, "No input directory specified! Aborting...\n");
-		exit(EXIT_FAILURE);
+	if (argc >= 2) {
+		strcpy(path, argv[1]);
+		path[strlen(argv[1])] = '\0';
+	} else {
+		strcpy(path, "./");
 	}
 
-	dir = dir_create(argv[1]);
+	dir = dir_create(path);
 
 	generator_process_widgets(dir);
+	generator_process_layout(dir);
 
-	//dir_print(dir);
+	dir_print(dir);
 
 	dir_delete(dir);
 
