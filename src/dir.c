@@ -193,6 +193,58 @@ void dir_print(Dir *dir) {
 }
 
 /**
+ * Iterates over the given dir
+ * and applies the given callback to the file
+ * if it's extension matches to the given extension.
+ *
+ * @param *dir directory to iterate over
+ * @param *ext extension to look for
+ * @param *callback callback function
+ */
+void dir_map_by_ext(Dir *dir, char *ext, void (*callback)(File *)) {
+	int i;
+
+	for (i=0; i < dir->files_count; i++) {
+		if ( strcmp(dir->files[i]->extension, ext) == 0) {
+			callback(dir->files[i]);
+		}
+	}
+}
+
+/**
+ *
+ */
+void file_write(File *file) {
+	FILE *fp;
+	char *file_name, *ext = ".html";
+
+	file_name = (char *)smalloc((strlen(ext) + strlen(file->name) + 1) * sizeof(char));
+	file_name[0] = '\0';
+
+	strcat(file_name, file->name);
+	strcat(file_name, ext);
+
+	fp = fopen(file_name, "w");
+	if (fp == NULL) {
+		fprintf(stderr, "Failed to write '%s', file skipped.", file_name);
+	}
+
+	fwrite(file->content, sizeof(char), strlen(file->content), fp);
+
+	fclose(fp);
+	sfree(file_name);
+}
+
+/**
+ * Writes the given dir to the filesystem
+ *
+ * @param[out] *dir Dir to write out
+ */
+void dir_write(Dir *dir) {
+	dir_map_by_ext(dir, "page", file_write);
+}
+
+/**
  * Frees the dynamic parts of the given file,
  * and finally the given file itself.
  *

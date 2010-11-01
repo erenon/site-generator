@@ -35,5 +35,7 @@ typedef struct _Dir {
 Dir *dir_create(char path[]);
 void dir_print(Dir *dir);
 void dir_delete(Dir *dir);
+void dir_map_by_ext(Dir *dir, char *ext, void (*callback)(File *));
+void dir_write(Dir *dir);
 
 #endif /* DIR_H_ */

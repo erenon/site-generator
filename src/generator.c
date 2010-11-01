@@ -335,25 +335,30 @@ static void process_layout(Dir *dir) {
 	}
 }
 
-static void process_page(File *page) {
-	format_text(&page->content);
-}
+static void embed_into_layout(char **content, char *layout) {
+	char *placeholder = "{content}", *newcontent = NULL;
+	int i, laylen, placelen, addlen;
 
-/**
- * Iterates over the given dir
- * and applies the given callback to the file
- * if it's extension matches to the given extension.
- *
- * @param *dir directory to iterate over
- * @param *ext extension to look for
- * @param *callback callback function
- */
-static void dir_map_by_ext(Dir *dir, char *ext, void (*callback)(File *)) {
-	int i;
+	laylen = strlen(layout);
+	placelen = strlen(placeholder);
+	addlen = strlen(*content) - placelen;
 
-	for (i=0; i < dir->files_count; i++) {
-		if ( strcmp(dir->files[i]->extension, ext) == 0) {
-			callback(dir->files[i]);
+	for (i=0; i < laylen; i++) {
+		if(layout[i] == placeholder[0]) {
+			if (memcmp(layout+i, placeholder, placelen) == 0) {
+				//replace
+				newcontent = (char *)smalloc((laylen+addlen+1) * sizeof(char));
+				newcontent[0] = '\0';
+
+				strncat(newcontent, layout, i);
+				strcat(newcontent, *content);
+				strcat(newcontent, layout+i+placelen);
+
+				sfree(*content);
+				*content = newcontent;
+
+				return;
+			}
 		}
 	}
 }
@@ -372,5 +377,25 @@ void generator_process_layout(Dir *dir) {
 }
 
 void generator_process_pages(Dir *dir) {
-	dir_map_by_ext(dir, "page", process_page);
+	int i;
+	char *layout = NULL;
+
+	if (has_layout(dir)) {
+		layout = dir->files[dir->layout_index]->content;
+	}
+
+	for (i=0; i < dir->files_count; i++) {
+		if ( strcmp(dir->files[i]->extension, "page") == 0) {
+			//format
+			format_text(&(dir->files[i])->content);
+
+			//embed into layout
+			if (layout != NULL) {
+				embed_into_layout(
+					&(dir->files[i])->content,
+					layout
+				);
+			}
+		}
+	}
 }

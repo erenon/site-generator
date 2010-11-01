@@ -27,6 +27,7 @@ int main(int argc, char *argv[]) {
 	generator_process_pages(dir);
 
 	//dir_print(dir);
+	dir_write(dir);
 
 	dir_delete(dir);
 
