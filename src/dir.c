@@ -214,25 +214,32 @@ void dir_map_by_ext(Dir *dir, char *ext, void (*callback)(File *)) {
 /**
  *
  */
-void file_write(File *file) {
+STATUS file_write(File *file, char *path) {
 	FILE *fp;
 	char *file_name, *ext = ".html";
 
-	file_name = (char *)smalloc((strlen(ext) + strlen(file->name) + 1) * sizeof(char));
-	file_name[0] = '\0';
+	file_name = (char *)smalloc(
+			(strlen(path) + strlen(file->name) + strlen(ext) + 1)
+			* sizeof(char)
+	);
 
+	strcpy(file_name, path);
 	strcat(file_name, file->name);
 	strcat(file_name, ext);
 
 	fp = fopen(file_name, "w");
 	if (fp == NULL) {
-		fprintf(stderr, "Failed to write '%s', file skipped.", file_name);
+		fprintf(stderr, "Failed to write '%s', file skipped.\n", file_name);
+		sfree(file_name);
+		return STATUS_CODE_FAILED;
 	}
 
 	fwrite(file->content, sizeof(char), strlen(file->content), fp);
 
 	fclose(fp);
 	sfree(file_name);
+
+	return STATUS_CODE_SUCC;
 }
 
 /**
@@ -240,8 +247,28 @@ void file_write(File *file) {
  *
  * @param[out] *dir Dir to write out
  */
-void dir_write(Dir *dir) {
-	dir_map_by_ext(dir, "page", file_write);
+STATUS dir_write(Dir *dir, char *path) {
+	int i;
+	STATUS curr_s, s = STATUS_CODE_SUCC;
+
+	for (i=0; i < dir->files_count; i++) {
+		if ( strcmp(dir->files[i]->extension, "page") == 0) {
+			curr_s = file_write(dir->files[i], path);
+			if (curr_s == STATUS_CODE_FAILED) {
+				s = STATUS_CODE_FAILED;
+			}
+		}
+	}
+
+	if (s == STATUS_CODE_FAILED) {
+		fprintf(
+			stderr,
+			"Unable to write one or more file. Does the given dir '%s' exist?\n",
+			path
+		);
+	}
+
+	return s;
 }
 
 /**

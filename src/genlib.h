@@ -11,8 +11,6 @@ void *semalloc(size_t count, void *t);
 
 /**
  * Status
- *
- * @todo remove if not used
  */
 typedef enum _STATUS {
 	STATUS_CODE_SUCC,
