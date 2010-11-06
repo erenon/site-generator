@@ -41,10 +41,3 @@ void *sfree(void *pointer) {
 
 	return 0;
 }
-
-/**
- * @deprecated Useless without typeof
- */
-void *semalloc(size_t count, void *p) {
-	return (typeof(*p) *)smalloc(count*sizeof(typeof(*p)));
-}

@@ -13,7 +13,7 @@ void *semalloc(size_t count, void *t);
  * Status
  */
 typedef enum _STATUS {
-	STATUS_CODE_SUCC,
+	STATUS_SUCC,
 	STATUS_CODE_FAILED
 } STATUS;
 

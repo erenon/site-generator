@@ -27,13 +27,13 @@ static void format_text_replace_bb(char **text, char bbstart, char bbend, char *
 
 	tlength = strlen(*text);
 
-	//additional length with each pair of html tags
+	/*additional length with each pair of html tags*/
 	addlen = strlen(htmlstart)+ strlen(htmlend);
 
 	for(i = 0; i < tlength; i++) {
 		if ((*text)[i] == bbstart) {
 			if (start) {
-				//replace
+				/*replace*/
 				newtext = (char *)smalloc((tlength+addlen-1) * sizeof(char));
 				newtext[0] = '\0';
 				strncat(newtext, *text, start);
@@ -46,7 +46,7 @@ static void format_text_replace_bb(char **text, char bbstart, char bbend, char *
 				*text = newtext;
 				newtext = NULL;
 
-				//reset
+				/*reset*/
 				tlength = strlen(*text);
 				start = 0;
 			} else {
@@ -126,22 +126,22 @@ static void format_text_link(char **text) {
 			!ss &&
 		    memcmp(*text+i, bbss, bbsslen) == 0
 		) {
-			//opening tag first part found
+			/*opening tag first part found*/
 			ss = i;
 		} else if (
 			ss &&
 			!se &&
 			(*text)[i] == bbse
 		) {
-			//end of the opening tag
+			/*end of the opening tag*/
 			se = i;
 		} else if (
 			ss &&
 			se &&
 			memcmp(*text+i, bbe, bbelen) == 0
 		) {
-			//closing tag found
-			//replace
+			/*closing tag found*/
+			/*replace*/
 			newtext = (char *)smalloc((tlen + addlen) * sizeof(char *));
 			newtext[0] = '\0';
 
@@ -159,7 +159,7 @@ static void format_text_link(char **text) {
 			*text = newtext;
 			newtext = NULL;
 
-			//reset
+			/*reset*/
 			ss = se = 0;
 			tlen = strlen(*text);
 		}
@@ -196,14 +196,14 @@ static void format_text_img(char **text) {
 			!start &&
 			memcmp(*text+i, bbs, bbslen) == 0
 		) {
-			//opening tag found
+			/*opening tag found*/
 			start = i;
 		} else if (
 			start &&
 			(*text)[i] == bbe
 		) {
-			//closing tag
-			//replace
+			/*closing tag*/
+			/*replace*/
 			newtext = (char *)smalloc((tlen + addlen) * sizeof(char *));
 			newtext[0] = '\0';
 
@@ -219,7 +219,7 @@ static void format_text_img(char **text) {
 			*text = newtext;
 			newtext = NULL;
 
-			//reset
+			/*reset*/
 			start = 0;
 			tlen = strlen(*text);
 		}
@@ -250,12 +250,11 @@ static void process_widget(File *widget) {
 }
 
 /**
- * @todo use enum instead of magic numbers
  */
 static int has_layout(Dir *dir) {
 	int i;
-	if (dir->layout_index == -2) {
-		dir->layout_index = -1;
+	if (dir->layout_index == UNINITIALIZED) {
+		dir->layout_index = NO_LAYOUT;
 
 		for(i=0; i < dir->files_count; i++) {
 			if (strcmp(dir->files[i]->name, "layout") == 0) {
@@ -278,7 +277,7 @@ static void replace_placeholder(char **layout, char *placeholder, char *replacet
 	for (i=0; i < tlen; i++) {
 		if ((*layout)[i] == placeholder[0]) {
 			if (memcmp(*layout+i, placeholder, placelen) == 0) {
-				//replace
+				/*replace*/
 				newlayout = (char *)smalloc((tlen+addlen+1) * sizeof(char));
 				newlayout[0] = '\0';
 
@@ -290,7 +289,7 @@ static void replace_placeholder(char **layout, char *placeholder, char *replacet
 				*layout = newlayout;
 				newlayout = NULL;
 
-				//reset
+				/*reset*/
 				tlen = strlen(*layout);
 			}
 		}
@@ -346,7 +345,7 @@ static void embed_into_layout(char **content, char *layout) {
 	for (i=0; i < laylen; i++) {
 		if(layout[i] == placeholder[0]) {
 			if (memcmp(layout+i, placeholder, placelen) == 0) {
-				//replace
+				/*replace*/
 				newcontent = (char *)smalloc((laylen+addlen+1) * sizeof(char));
 				newcontent[0] = '\0';
 
@@ -386,13 +385,13 @@ void generator_process_pages(Dir *dir) {
 
 	for (i=0; i < dir->files_count; i++) {
 		if ( strcmp(dir->files[i]->extension, "page") == 0) {
-			//format
+			/*format*/
 			format_text(&(dir->files[i])->content);
 
-			//embed into layout
+			/*embed into layout*/
 			if (layout != NULL) {
 				embed_into_layout(
-					&(dir->files[i])->content,
+						&(dir->files[i])->content,
 					layout
 				);
 			}

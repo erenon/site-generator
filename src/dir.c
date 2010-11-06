@@ -30,12 +30,12 @@ static void parse_fname(File *file, char *fname) {
 
 	for (i=len;i>=0;i--) {
 		if (fname[i] == '.') {
-			//copy name
+			/*copy name*/
 			file->name = (char *)smalloc((i+2) * sizeof(char));
 			strncpy(file->name, fname, i);
 			file->name[i] = '\0';
 
-			//copy extension
+			/*copy extension*/
 			file->extension = (char *)smalloc((len-i) * sizeof(char));
 			strcpy(file->extension, fname+i+1);
 			file->extension[len-i-1] = '\0';
@@ -44,7 +44,7 @@ static void parse_fname(File *file, char *fname) {
 		}
 	}
 
-	//no dot found
+	/*no dot found*/
 	file->name = (char *)smalloc((len+1) * sizeof(char));
 	strcpy(file->name, fname);
 	file->name[len] = '\0';
@@ -69,7 +69,7 @@ static File *read_file(char *path, char *fname) {
 	int filesize;
 	File *file;
 
-	//hack! trim newline;
+	/*hack! trim newline;*/
 	fname[strlen(fname)-1] = '\0';
 
 	strcpy(file_path, path);
@@ -81,7 +81,7 @@ static File *read_file(char *path, char *fname) {
 		return NULL;
 	}
 
-	//get file length
+	/*get file length*/
 	fseek(fp, 0, SEEK_END);
 	filesize = ftell(fp);
 
@@ -108,11 +108,11 @@ static File *read_file(char *path, char *fname) {
  * and calls read_file to read the indexed files
  * as well.
  *
- * @warning Aborts the execution if no index found.
- *
  * @param *dir Dir to read
+ *
+ * @return STATUS_SUCC or STATUS_CODE_FAILED if failed to read index
  */
-static void read(Dir *dir) {
+static STATUS read(Dir *dir) {
 	FILE *index = NULL;
 	char file_name[DIR_MAX_LINE_LENGTH];
 	int linec=0, i;
@@ -124,8 +124,7 @@ static void read(Dir *dir) {
 
 	index = fopen(dir_index, "r");
 	if (index == NULL) {
-	    fprintf(stderr, "Failed to read index! Aborting...\n");
-	    exit(EXIT_FAILURE);
+	    return STATUS_CODE_FAILED;
 	}
 
 	while (fgets(file_name, DIR_MAX_LINE_LENGTH, index) != NULL) {
@@ -147,8 +146,9 @@ static void read(Dir *dir) {
 		}
 	}
 
-
 	fclose(index);
+
+	return STATUS_SUCC;
 }
 
 /**
@@ -156,10 +156,12 @@ static void read(Dir *dir) {
  * resets its parameters,
  * and call read to read the whole dir.
  *
- * @param *path Path to read from. Not implemented.
+ * @param *path Path to read from.
+ * @param *s
+ *
  * @return Dir* dir instance
  */
-Dir *dir_create(char *path) {
+Dir *dir_create(char *path, STATUS *s) {
 	Dir *dir = NULL;
 
 	dir = (Dir *)smalloc(sizeof(Dir));
@@ -169,9 +171,9 @@ Dir *dir_create(char *path) {
 
 	dir->file_to_process_count = 0;
 	dir->files_count = 0;
-	dir->layout_index = -2;
+	dir->layout_index = UNINITIALIZED;
 
-	read(dir);
+	*s = read(dir);
 
 	return dir;
 }
@@ -183,7 +185,7 @@ Dir *dir_create(char *path) {
 void dir_print(Dir *dir) {
 	int i;
 
-	//printf("path: %s\nfiles:\n\n", dir->path);
+	printf("path: %s\nfiles:\n\n", dir->path);
 
 	for (i=0; i < dir->files_count; i++) {
 		printf("filename: %s\n", dir->files[i]->name);
@@ -214,7 +216,7 @@ void dir_map_by_ext(Dir *dir, char *ext, void (*callback)(File *)) {
 /**
  *
  */
-STATUS file_write(File *file, char *path) {
+static STATUS file_write(File *file, char *path) {
 	FILE *fp;
 	char *file_name, *ext = ".html";
 
@@ -239,7 +241,7 @@ STATUS file_write(File *file, char *path) {
 	fclose(fp);
 	sfree(file_name);
 
-	return STATUS_CODE_SUCC;
+	return STATUS_SUCC;
 }
 
 /**
@@ -249,7 +251,7 @@ STATUS file_write(File *file, char *path) {
  */
 STATUS dir_write(Dir *dir, char *path) {
 	int i;
-	STATUS curr_s, s = STATUS_CODE_SUCC;
+	STATUS curr_s, s = STATUS_SUCC;
 
 	for (i=0; i < dir->files_count; i++) {
 		if ( strcmp(dir->files[i]->extension, "page") == 0) {

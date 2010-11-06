@@ -1,5 +1,7 @@
 /*
  * @author erenon
+ *
+ * @todo wrap ifdebug around dir_print
  */
 
 #ifndef DIR_H_
@@ -19,6 +21,11 @@ typedef struct _File {
 	char *content; 	 /**< full content of the file */
 } File;
 
+typedef enum _DIR_LAYOUT {
+	UNINITIALIZED = -2,
+	NO_LAYOUT = -1
+} DIR_LAYOUT;
+
 /**
  * Represents a directory on the filesystem
  * Should contain an index file
@@ -32,7 +39,7 @@ typedef struct _Dir {
 	int layout_index;			/**< index of the layout file in the files array */
 } Dir;
 
-Dir *dir_create(char path[]);
+Dir *dir_create(char path[], STATUS *s);
 void dir_print(Dir *dir);
 void dir_delete(Dir *dir);
 void dir_map_by_ext(Dir *dir, char *ext, void (*callback)(File *));
