@@ -48,11 +48,10 @@ int main(int argc, char *argv[]) {
 	char input_path[MAX_PATH_LENGTH],
 		 output_path[MAX_PATH_LENGTH];
 	STATUS s;
-	CONFIG cfg;
 
 	set_input_path(input_path, argc, argv);
 	set_output_path(output_path, argc, argv);
-	set_img_dir(cfg.img_dir, argc, argv);
+	set_img_dir(g_cfg.img_dir, argc, argv);
 
 
 	dir = dir_create(input_path, &s);
