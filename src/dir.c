@@ -75,7 +75,7 @@ static /*@null@*/ File *read_file(char *path, char *fname) {
 	strcpy(file_path, path);
 	strcat(file_path, fname);
 
-	fp = fopen(file_path, "r");
+	fp = fopen(file_path, "rt");
 	if (fp == NULL) {
 		fprintf(stderr, "Failed to read file: '%s', file skipped.\n", fname);
 		return NULL;
@@ -123,7 +123,7 @@ static STATUS read(Dir *dir) {
 	strcpy(dir_index, dir->path);
 	strcat(dir_index, "index");
 
-	index = fopen(dir_index, "r");
+	index = fopen(dir_index, "rt");
 	if (index == NULL) {
 	    return STATUS_CODE_FAILED;
 	}
@@ -211,7 +211,7 @@ static STATUS file_write(File *file, char *path) {
 	strcat(file_name, file->name);
 	strcat(file_name, ext);
 
-	fp = fopen(file_name, "w");
+	fp = fopen(file_name, "wt");
 	if (fp == NULL) {
 		fprintf(stderr, "Failed to write '%s', file skipped.\n", file_name);
 		sfree(file_name);
