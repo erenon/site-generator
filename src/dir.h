@@ -8,11 +8,6 @@
 #define DIR_H_
 
 /**
- * Max length of the dir path
- */
-#define DIR_MAX_PATH_LENGTH 1024
-
-/**
  * Represents a file on the filesystem
  */
 typedef struct _File {

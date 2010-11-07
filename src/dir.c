@@ -26,13 +26,13 @@
  */
 static void parse_fname(File *file, char *fname) {
 	int len,i;
-	len = strlen(fname);
+	len = (int)strlen(fname);
 
 	for (i=len;i>=0;i--) {
 		if (fname[i] == '.') {
 			/*copy name*/
 			file->name = (char *)smalloc((i+2) * sizeof(char));
-			strncpy(file->name, fname, i);
+			strncpy(file->name, fname, (size_t)i);
 			file->name[i] = '\0';
 
 			/*copy extension*/
@@ -63,10 +63,10 @@ static void parse_fname(File *file, char *fname) {
  * @param *fname Name of the file to read
  * @return File* or NULL if file not found.
  */
-static File *read_file(char *path, char *fname) {
-	char file_path[DIR_MAX_PATH_LENGTH];
+static /*@null@*/ File *read_file(char *path, char *fname) {
+	char file_path[MAX_PATH_LENGTH];
 	FILE *fp = NULL;
-	int filesize;
+	long int filesize;
 	File *file;
 
 	/*hack! trim newline;*/
@@ -82,23 +82,24 @@ static File *read_file(char *path, char *fname) {
 	}
 
 	/*get file length*/
-	fseek(fp, 0, SEEK_END);
+	(void)fseek(fp, 0, SEEK_END);
 	filesize = ftell(fp);
 
+	/*create file*/
 	file = (File *)smalloc(sizeof(File));
 
-	file->content = (char *)smalloc(filesize+1 * sizeof(char));
+	file->content = (char *)smalloc((size_t)filesize+1 * sizeof(char));
 
 	if (filesize > 0) {
 		rewind(fp);
-		fread(file->content, filesize, 1, fp);
+		(void)fread(file->content, (size_t)filesize, 1, fp);
 	}
 
 	file->content[filesize] = '\0';
 
 	parse_fname(file, fname);
 
-	fclose(fp);
+	(void)fclose(fp);
 
 	return file;
 }
@@ -116,7 +117,7 @@ static STATUS read(Dir *dir) {
 	FILE *index = NULL;
 	char file_name[DIR_MAX_LINE_LENGTH];
 	int linec=0, i;
-	char dir_index[DIR_MAX_PATH_LENGTH];
+	char dir_index[MAX_PATH_LENGTH];
 	File *cfile = NULL;
 
 	strcpy(dir_index, dir->path);
@@ -146,7 +147,7 @@ static STATUS read(Dir *dir) {
 		}
 	}
 
-	fclose(index);
+	(void)fclose(index);
 
 	return STATUS_SUCC;
 }
@@ -236,9 +237,9 @@ static STATUS file_write(File *file, char *path) {
 		return STATUS_CODE_FAILED;
 	}
 
-	fwrite(file->content, sizeof(char), strlen(file->content), fp);
+	(void)fwrite(file->content, sizeof(char), strlen(file->content), fp);
 
-	fclose(fp);
+	(void)fclose(fp);
 	sfree(file_name);
 
 	return STATUS_SUCC;
@@ -260,14 +261,6 @@ STATUS dir_write(Dir *dir, char *path) {
 				s = STATUS_CODE_FAILED;
 			}
 		}
-	}
-
-	if (s == STATUS_CODE_FAILED) {
-		fprintf(
-			stderr,
-			"Unable to write one or more file. Does the given dir '%s' exist?\n",
-			path
-		);
 	}
 
 	return s;

@@ -9,25 +9,51 @@
 #include "dir.h"
 #include "generator.h"
 
-int main(int argc, char *argv[]) {
-	Dir *dir;
-	char input_path[DIR_MAX_PATH_LENGTH],
-		 output_path[DIR_MAX_PATH_LENGTH];
-	STATUS s;
-
-	/*set input path*/
+static void set_input_path(char *input_path, int argc, char *argv[]) {
 	if (argc >= 2) {
 		strcpy(input_path, argv[1]);
 	} else {
 		strcpy(input_path, "./");
 	}
+}
 
-	/*set output path*/
+static void set_output_path(char *output_path, int argc, char *argv[]) {
 	if (argc >= 3) {
 		strcpy(output_path, argv[2]);
 	} else {
 		strcpy(output_path, "./");
 	}
+}
+
+static void set_img_dir(char *img_dir, int argc, char *argv[]) {
+	int i;
+
+	for (i=0; i < argc; i++) {
+		if (strcmp(argv[i], "--img") == 0) {
+			if (i+1 < argc) { /* there is param after the switch */
+				strcpy(img_dir, argv[i+1]);
+				return;
+			}
+		}
+	}
+
+	/* no switch and path found
+	 * use default */
+	strcpy(img_dir, "");
+	return;
+}
+
+int main(int argc, char *argv[]) {
+	Dir *dir;
+	char input_path[MAX_PATH_LENGTH],
+		 output_path[MAX_PATH_LENGTH];
+	STATUS s;
+	CONFIG cfg;
+
+	set_input_path(input_path, argc, argv);
+	set_output_path(output_path, argc, argv);
+	set_img_dir(cfg.img_dir, argc, argv);
+
 
 	dir = dir_create(input_path, &s);
 
@@ -40,7 +66,15 @@ int main(int argc, char *argv[]) {
 	generator_process_layout(dir);
 	generator_process_pages(dir);
 
-	dir_write(dir, output_path);
+	s = dir_write(dir, output_path);
+
+	if (s == STATUS_CODE_FAILED) {
+		fprintf(
+			stderr,
+			"Unable to write one or more file. Does the given dir '%s' exist?\n",
+			output_path
+		);
+	}
 
 	dir_delete(dir);
 

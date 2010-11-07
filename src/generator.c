@@ -20,9 +20,11 @@
  * @param[in] bbend Closing tag to replace
  * @param[in] *htmlstart Opening html tag
  * @param[in] *htmlend Closing html tag
+ *
+ * @todo assuming bbstart and bbend the same char
  */
 static void format_text_replace_bb(char **text, char bbstart, char bbend, char *htmlstart, char *htmlend) {
-	int i, start=0, tlength, addlen;
+	int i, start=-1, tlength, addlen;
 	char *newtext = NULL;
 
 	tlength = strlen(*text);
@@ -32,7 +34,7 @@ static void format_text_replace_bb(char **text, char bbstart, char bbend, char *
 
 	for(i = 0; i < tlength; i++) {
 		if ((*text)[i] == bbstart) {
-			if (start) {
+			if (start != -1) {
 				/*replace*/
 				newtext = (char *)smalloc((tlength+addlen-1) * sizeof(char));
 				newtext[0] = '\0';
@@ -48,7 +50,7 @@ static void format_text_replace_bb(char **text, char bbstart, char bbend, char *
 
 				/*reset*/
 				tlength = strlen(*text);
-				start = 0;
+				start = -1;
 			} else {
 				start = i;
 			}
@@ -111,6 +113,9 @@ static void format_text_link(char **text) {
 		bbsslen, bbelen, htmlsslen, htmlselen, htmlelen,
 		tlen, addlen;
 
+	/*concat img path*/
+	//strcat(htmlss, cfg.img_dir);
+
 	bbsslen = strlen(bbss);
 	bbelen = strlen(bbe);
 
@@ -123,21 +128,21 @@ static void format_text_link(char **text) {
 
 	for (i=0; i < tlen; i++) {
 		if (
-			!ss &&
+			!(ss != 0) &&
 		    memcmp(*text+i, bbss, bbsslen) == 0
 		) {
 			/*opening tag first part found*/
 			ss = i;
 		} else if (
-			ss &&
-			!se &&
+			(ss != 0) &&
+			(se == 0) &&
 			(*text)[i] == bbse
 		) {
 			/*end of the opening tag*/
 			se = i;
 		} else if (
-			ss &&
-			se &&
+			(ss != 0) &&
+			(se != 0) &&
 			memcmp(*text+i, bbe, bbelen) == 0
 		) {
 			/*closing tag found*/
@@ -189,17 +194,17 @@ static void format_text_img(char **text) {
 
 	addlen = bbslen - 1 + htmlslen + htmlelen;
 
-	start = 0;
+	start = -1;
 
 	for (i = 0; i < tlen; i++) {
 		if (
-			!start &&
+			(start == -1) &&
 			memcmp(*text+i, bbs, bbslen) == 0
 		) {
 			/*opening tag found*/
 			start = i;
 		} else if (
-			start &&
+			(start != -1) &&
 			(*text)[i] == bbe
 		) {
 			/*closing tag*/
@@ -220,7 +225,7 @@ static void format_text_img(char **text) {
 			newtext = NULL;
 
 			/*reset*/
-			start = 0;
+			start = -1;
 			tlen = strlen(*text);
 		}
 	}
@@ -304,7 +309,7 @@ static void process_layout(Dir *dir) {
 	char **layout;
 	char *placeholder;
 
-	if (has_layout(dir)) {
+	if (has_layout(dir) != 0) {
 		layout = &(dir->files[dir->layout_index])->content;
 	} else {
 		return;
@@ -379,7 +384,7 @@ void generator_process_pages(Dir *dir) {
 	int i;
 	char *layout = NULL;
 
-	if (has_layout(dir)) {
+	if (has_layout(dir) != 0) {
 		layout = dir->files[dir->layout_index]->content;
 	}
 

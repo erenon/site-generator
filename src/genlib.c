@@ -31,13 +31,11 @@ void *smalloc(size_t size) {
  *
  * Prints error if null pointer given
  */
-void *sfree(void *pointer) {
+void sfree(void *pointer) {
 	if (pointer != NULL) {
 		free(pointer);
 		pointer = NULL;
 	} else {
 		fprintf(stderr, "Freeing NULL pointer! Do nothing.\n");
 	}
-
-	return 0;
 }
