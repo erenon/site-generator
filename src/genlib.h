@@ -25,4 +25,9 @@ typedef struct _CONFIG {
 	char img_dir[MAX_PATH_LENGTH];
 } CONFIG;
 
+/**
+ * GLOBAL variable
+ */
+CONFIG g_cfg;
+
 #endif /* GENLIB_H_ */
