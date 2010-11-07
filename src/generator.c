@@ -21,9 +21,8 @@
  * @param[in] *htmlstart Opening html tag
  * @param[in] *htmlend Closing html tag
  *
- * @todo assuming bbstart and bbend the same char
  */
-static void format_text_replace_bb(char **text, char bbstart, char bbend, char *htmlstart, char *htmlend) {
+static void format_text_replace_bb(char **text, char bbsep, char *htmlstart, char *htmlend) {
 	int i, start=-1, tlength, addlen;
 	char *newtext = NULL;
 
@@ -33,7 +32,7 @@ static void format_text_replace_bb(char **text, char bbstart, char bbend, char *
 	addlen = strlen(htmlstart)+ strlen(htmlend);
 
 	for(i = 0; i < tlength; i++) {
-		if ((*text)[i] == bbstart) {
+		if ((*text)[i] == bbsep) {
 			if (start != -1) {
 				/*replace*/
 				newtext = (char *)smalloc((tlength+addlen-1) * sizeof(char));
@@ -69,7 +68,6 @@ static void format_text_italic(char **text) {
 	format_text_replace_bb(
 			text,
 			'_',
-			'_',
 			"<em>",
 			"</em>"
 	);
@@ -85,7 +83,6 @@ static void format_text_italic(char **text) {
 static void format_text_bold(char **text) {
 	format_text_replace_bb(
 		text,
-		'*',
 		'*',
 		"<strong>",
 		"</strong>"
@@ -175,17 +172,23 @@ static void format_text_link(char **text) {
  * Replaces bb coded img tags to html tags.
  *
  * @param **text Source to search in
- *
- * @todo handle predefined separated img dir
  */
 static void format_text_img(char **text) {
 	char *bbs = "[img:",
 		 bbe = ']',
-		 *htmls = "<img src=\"",
+		 *htmls,
 		 *htmle = "\" />",
 		 *newtext = NULL;
 	int i, bbslen, htmlslen, htmlelen, tlen, addlen,
 		start;
+
+	htmls = (char *)smalloc(
+			(strlen("<img src=\"") + strlen(g_cfg.img_dir) + 1) *
+			sizeof(char)
+	);
+
+	strcpy(htmls, "<img src=\"");
+	strcat(htmls, g_cfg.img_dir);
 
 	bbslen = strlen(bbs);
 	htmlslen = strlen(htmls);
@@ -214,7 +217,7 @@ static void format_text_img(char **text) {
 
 			strncat(newtext, *text, start);
 			strcat(newtext, htmls);
-			strncat(newtext, *text+start+bbslen, i-start-bbslen-1);
+			strncat(newtext, *text+start+bbslen, i-start-bbslen);
 			strcat(newtext, htmle);
 			strcat(newtext, *text+i+1);
 
@@ -230,6 +233,7 @@ static void format_text_img(char **text) {
 		}
 	}
 
+	sfree(htmls);
 }
 
 /**
@@ -243,15 +247,6 @@ static void format_text(char **text) {
 	format_text_bold(text);
 	format_text_link(text);
 	format_text_img(text);
-}
-
-/**
- * Process the given file as a widget
- *
- * @param *widget file to process
- */
-static void process_widget(File *widget) {
-	format_text(&widget->content);
 }
 
 /**
@@ -373,7 +368,13 @@ static void embed_into_layout(char **content, char *layout) {
  * @param *dir
  */
 void generator_process_widgets(Dir *dir) {
-	dir_map_by_ext(dir, "widget", process_widget);
+	int i;
+
+	for (i=0; i < dir->files_count; i++) {
+		if (strcmp(dir->files[i]->extension, "widget") == 0) {
+			format_text(&dir->files[i]->content);
+		}
+	}
 }
 
 void generator_process_layout(Dir *dir) {
