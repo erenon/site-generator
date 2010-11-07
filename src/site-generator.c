@@ -61,6 +61,8 @@ int main(int argc, char *argv[]) {
 		return EXIT_FAILURE;
 	}
 
+	g_cfg.dir = dir;
+
 	generator_process_widgets(dir);
 	generator_process_layout(dir);
 	generator_process_pages(dir);

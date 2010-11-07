@@ -21,7 +21,10 @@ typedef enum _STATUS {
 	STATUS_CODE_FAILED
 } STATUS;
 
+#include "dir.h"
+
 typedef struct _CONFIG {
+	Dir *dir;
 	char img_dir[MAX_PATH_LENGTH];
 } CONFIG;
 
