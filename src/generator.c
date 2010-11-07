@@ -110,9 +110,6 @@ static void format_text_link(char **text) {
 		bbsslen, bbelen, htmlsslen, htmlselen, htmlelen,
 		tlen, addlen;
 
-	/*concat img path*/
-	//strcat(htmlss, cfg.img_dir);
-
 	bbsslen = strlen(bbss);
 	bbelen = strlen(bbe);
 
@@ -144,7 +141,7 @@ static void format_text_link(char **text) {
 		) {
 			/*closing tag found*/
 			/*replace*/
-			newtext = (char *)smalloc((tlen + addlen) * sizeof(char *));
+			newtext = (char *)smalloc((tlen + addlen + 1) * sizeof(char *));
 			newtext[0] = '\0';
 
 			strncat(newtext, *text, ss);
@@ -155,7 +152,7 @@ static void format_text_link(char **text) {
 			strcat(newtext, htmle);
 			strcat(newtext, *text+i+bbelen);
 
-			newtext[tlen + addlen - 1] = '\0';
+			newtext[tlen + addlen] = '\0';
 
 			sfree(*text);
 			*text = newtext;
