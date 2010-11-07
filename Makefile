@@ -1,5 +1,5 @@
 valgrind:
-	valgrind  --log-file=/tmp/val.grd --leak-check=full --track-origins=yes ./Debug/site-generator Debug/
+	valgrind  --log-file=/tmp/val.grd --leak-check=full --track-origins=yes ./Debug/site-generator Debug/ Debug/output/ --img Debug/output/img/
 	
 C_SRCS += \
 ./src/dir.c \
