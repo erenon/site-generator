@@ -196,25 +196,6 @@ void dir_print(Dir *dir) {
 }
 
 /**
- * Iterates over the given dir
- * and applies the given callback to the file
- * if it's extension matches to the given extension.
- *
- * @param *dir directory to iterate over
- * @param *ext extension to look for
- * @param *callback callback function
- */
-void dir_map_by_ext(Dir *dir, char *ext, void (*callback)(File *)) {
-	int i;
-
-	for (i=0; i < dir->files_count; i++) {
-		if ( strcmp(dir->files[i]->extension, ext) == 0) {
-			callback(dir->files[i]);
-		}
-	}
-}
-
-/**
  *
  */
 static STATUS file_write(File *file, char *path) {
