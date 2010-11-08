@@ -293,6 +293,52 @@ static void replace_placeholder(char **layout, char *placeholder, char *replacet
 	}
 }
 
+static char *get_navigation_item(char *page_name) {
+	char *itemss = "<li><a href=\"";
+	char *itemse = ".html\">";
+	char *iteme = "</a></li>";
+	char *item;
+
+	int sslen, selen, elen, namelen;
+
+	sslen = strlen(itemss);
+	selen = strlen(itemse);
+	elen = strlen(iteme);
+	namelen = strlen(page_name);
+
+	item = (char *)smalloc(
+			(sslen + selen + elen + namelen + 1) *
+			sizeof(char)
+	);
+
+	strcpy(item, itemss);
+	strcat(item, page_name);
+	strcat(item, itemse);
+	strcat(item, page_name);
+	strcat(item, iteme);
+
+	return item;
+}
+
+static void embed_navigation(char **text) {
+	char places = '{';
+	char *placeholder = "{navigation}";
+	int i, placelen, /*ullen, ulelen,*/ navlen;
+	char *ul = "<ul>", *ule = "</ul>";
+	char *navigation;
+
+	placelen = strlen(placeholder);
+
+	for(i = 0; (*text)[i]; i++) {
+		if ((*text)[i] == places) {
+			if (memcmp(*text+i, placeholder, placelen) == 0) {
+
+			}
+		}
+	}
+
+}
+
 /*
  * @todo handle {navigation}
  */

@@ -247,6 +247,22 @@ STATUS dir_write(Dir *dir, char *path) {
 	return s;
 }
 
+int is_page(char *file_name) {
+	Dir *dir;
+	int i;
+
+	dir = g_cfg.dir;
+
+	for (i = 0; i < dir->files_count; i++) {
+		if ((strcmp(dir->files[i]->name, file_name) == 0)
+		&& (strcmp(dir->files[i]->extension, "page"))) {
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
 /**
  * Frees the dynamic parts of the given file,
  * and finally the given file itself.
