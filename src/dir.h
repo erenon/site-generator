@@ -34,6 +34,8 @@ typedef struct _Dir {
 	int layout_index;			/**< index of the layout file in the files array */
 } Dir;
 
+#include "genlib.h"
+
 Dir *dir_create(char path[], STATUS *s);
 void dir_print(Dir *dir);
 void dir_delete(Dir *dir);
