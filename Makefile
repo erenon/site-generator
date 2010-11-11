@@ -22,4 +22,7 @@ clean:
 site-generator: $(OBJS) $(C_SRCS)
 	gcc -o site-generator $(OBJS)
 	
+sample:
+	./site-generator sample/input/ sample/output/ --img img/
+	
 all: site-generator clean

@@ -1,0 +1,59 @@
+body {
+	margin: 0;
+	padding: 0;
+}
+
+h1 {
+	width: 100%;
+	font-size: 5em;
+	color: #fff;
+	height: 3em;
+	text-align: center;
+	line-height: 3em;
+	margin: 0;
+	padding: 0;
+	clear: both;
+	
+	background: #303133;
+	background: -moz-linear-gradient(top, #303133 0%, #000000 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#303133), color-stop(100%,#000000)); 
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#303133', endColorstr='#000000',GradientType=0 );
+}
+
+header nav ul {
+	margin: 0;
+	paddgin: 0;
+	float: right;
+}
+
+header nav ul li {
+	display: block;
+	float: right;
+	margin: 0;
+}
+
+header nav ul li a {
+	padding: 0 1em;
+	height: 3em;
+	line-height: 3em;
+}
+
+section {
+	margin: 2em;
+	text-align: justify;
+}
+
+section img {
+	float: right;
+	margin: 0 0 1em 1em;
+}
+
+footer {
+	width: 100%;
+	text-align: center;
+	color: #888;
+}
+
+footer a{
+	color: #444;
+}

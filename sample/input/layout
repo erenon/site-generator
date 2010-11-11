@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+ <title>Teleki Pál</title>
+ 
+ <meta charset="utf-8" />
+ <meta name="description" content="" />
+ <meta name="keywords" content="" />
+ <meta name="author" content="erenon" />
+
+ <meta name="robots" content="index, follow" />
+ <meta name="revisit-after" content="14 days" />
+ 
+ <style>{widget:stylesheet}</style>
+ 
+</head>
+<body>
+    <header>
+    	<nav>{navigation}</nav>
+    	{widget:head}
+    </header>
+    <article>
+        <section>
+        	{content}
+        </section>
+    </article>
+    <!--<side>
+    	{widget:avatar}
+    </side>-->
+    <footer>
+    	{widget:footer}
+    </footer>
+</body>
+</html>
+
