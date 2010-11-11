@@ -1,12 +1,10 @@
 <!DOCTYPE html>
 <html lang="hu">
 <head>
- <title>Teleki Pál</title>
+ <title>{widget:head}</title>
  
  <meta charset="utf-8" />
- <meta name="description" content="" />
- <meta name="keywords" content="" />
- <meta name="author" content="erenon" />
+ <meta name="generator" content="site-generator">
 
  <meta name="robots" content="index, follow" />
  <meta name="revisit-after" content="14 days" />
@@ -17,7 +15,7 @@
 <body>
     <header>
     	<nav>{navigation}</nav>
-    	{widget:head}
+    	<h1>{widget:head}</h1>
     </header>
     <article>
         <section>

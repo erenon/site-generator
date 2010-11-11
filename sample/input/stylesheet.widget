@@ -6,6 +6,7 @@ body {
 h1 {
 	width: 100%;
 	font-size: 5em;
+	font-family: serif;
 	color: #fff;
 	height: 3em;
 	text-align: center;
@@ -13,6 +14,9 @@ h1 {
 	margin: 0;
 	padding: 0;
 	clear: both;
+	
+	text-shadow: 2px 2px 0px #444444;
+	filter: dropshadow(color=#444444, offx=2, offy=2);
 	
 	background: #303133;
 	background: -moz-linear-gradient(top, #303133 0%, #000000 100%);
@@ -41,6 +45,7 @@ header nav ul li a {
 section {
 	margin: 2em;
 	text-align: justify;
+	font-family: "Trebuchet MS";
 }
 
 section img {
