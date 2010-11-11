@@ -103,17 +103,22 @@ static void format_text_link(char **text) {
 		 bbse = ']',
 		 *bbe = "[/l]",
 		 *htmlss = "<a href=\"",
+		 *prefix = "http://",
+		 *suffix = ".html",
 		 *htmlse = "\">",
 		 *htmle = "</a>",
 		 *newtext = NULL;
+	char target[DIR_MAX_LINE_LENGTH];
 	int ss = 0, se = 0, i,
 		bbsslen, bbelen, htmlsslen, htmlselen, htmlelen,
-		tlen, addlen;
+		tlen, addlen, prefixlen, suffixlen, cfixlen, is_local_page;
 
 	bbsslen = strlen(bbss);
 	bbelen = strlen(bbe);
 
 	htmlsslen = strlen(htmlss);
+	prefixlen = strlen(prefix);
+	suffixlen = strlen(suffix);
 	htmlselen = strlen(htmlse);
 	htmlelen = strlen(htmle);
 
@@ -140,19 +145,34 @@ static void format_text_link(char **text) {
 			memcmp(*text+i, bbe, bbelen) == 0
 		) {
 			/*closing tag found*/
+
+			/*is local?*/
+			target[0] = '\0';
+			strncat(target, *text+ss+bbsslen, se-ss-bbsslen);
+			is_local_page = dir_is_page(target);
+
+			/*if local, add .html, else add http:// */
+			cfixlen = (is_local_page) ? suffixlen : prefixlen;
+
 			/*replace*/
-			newtext = (char *)smalloc((tlen + addlen + 1) * sizeof(char *));
+			newtext = (char *)smalloc(
+					(tlen + addlen + cfixlen + 1) * sizeof(char *)
+			);
 			newtext[0] = '\0';
 
 			strncat(newtext, *text, ss);
 			strcat(newtext, htmlss);
+			/*add http:// if remote target*/
+			if (!is_local_page) { strcat(newtext, prefix); }
 			strncat(newtext, *text+ss+bbsslen, se-ss-bbsslen);
+			/*add .html if local target*/
+			if (is_local_page) { strcat(newtext, suffix); }
 			strcat(newtext, htmlse);
 			strncat(newtext, *text+se+1, i-se-1);
 			strcat(newtext, htmle);
 			strcat(newtext, *text+i+bbelen);
 
-			newtext[tlen + addlen] = '\0';
+			newtext[tlen + addlen + cfixlen] = '\0';
 
 			sfree(*text);
 			*text = newtext;
@@ -293,6 +313,10 @@ static void replace_placeholder(char **layout, char *placeholder, char *replacet
 	}
 }
 
+static int get_navigation_item_length(char *page_name) {
+	return 13 + strlen(page_name)*2 + 7 + 9;
+}
+
 static char *get_navigation_item(char *page_name) {
 	char *itemss = "<li><a href=\"";
 	char *itemse = ".html\">";
@@ -307,7 +331,7 @@ static char *get_navigation_item(char *page_name) {
 	namelen = strlen(page_name);
 
 	item = (char *)smalloc(
-			(sslen + selen + elen + namelen + 1) *
+			(sslen + selen + elen + namelen*2 + 1) *
 			sizeof(char)
 	);
 
@@ -321,26 +345,42 @@ static char *get_navigation_item(char *page_name) {
 }
 
 static void embed_navigation(char **text) {
-	char places = '{';
-	char *placeholder = "{navigation}";
-	int i, placelen, /*ullen, ulelen,*/ navlen;
-	char *ul = "<ul>", *ule = "</ul>";
-	char *navigation;
+	char *navboxs = "<ul>", *navboxe = "</ul>", *navigation, *item;
+	int i, navboxlen, itemslen;
 
-	placelen = strlen(placeholder);
+	navboxlen = strlen(navboxs) + strlen(navboxe);
 
-	for(i = 0; (*text)[i]; i++) {
-		if ((*text)[i] == places) {
-			if (memcmp(*text+i, placeholder, placelen) == 0) {
-
-			}
+	/*measure items length*/
+	itemslen = 0;
+	for (i=0; i < g_cfg.dir->files_count; i++) {
+		if (dir_is_page(g_cfg.dir->files[i]->name)) {
+			itemslen += get_navigation_item_length(
+					g_cfg.dir->files[i]->name
+			);
 		}
 	}
 
+	/*allocate navigation*/
+	navigation = (char *)smalloc((itemslen+navboxlen+1) * sizeof(char));
+
+	strcpy(navigation, navboxs);
+	/*embed items*/
+	for (i=0; i < g_cfg.dir->files_count; i++) {
+		if (dir_is_page(g_cfg.dir->files[i]->name)) {
+			item = get_navigation_item(g_cfg.dir->files[i]->name);
+			strcat(navigation, item);
+			sfree(item);
+		}
+	}
+
+	strcat(navigation, navboxe);
+
+	replace_placeholder(text, "{navigation}", navigation);
+
+	sfree(navigation);
 }
 
 /*
- * @todo handle {navigation}
  */
 static void process_layout(Dir *dir) {
 	int i;
@@ -355,6 +395,7 @@ static void process_layout(Dir *dir) {
 
 	format_text_link(layout);
 	format_text_img(layout);
+	embed_navigation(layout);
 
 	for (i=0; i < dir->files_count; i++) {
 		if (strcmp(dir->files[i]->extension, "widget") == 0) {

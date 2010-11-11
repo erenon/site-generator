@@ -9,11 +9,6 @@
 #include "dir.h"
 
 /**
- * Max length of indexed file names
- */
-#define DIR_MAX_LINE_LENGTH 1024
-
-/**
  * Parses file name
  *
  * Explodes the full name at the last dot,
@@ -247,17 +242,19 @@ STATUS dir_write(Dir *dir, char *path) {
 	return s;
 }
 
-int is_page(char *file_name) {
+int dir_is_page(char *file_name) {
 	Dir *dir;
 	int i;
 
 	dir = g_cfg.dir;
 
 	for (i = 0; i < dir->files_count; i++) {
-		if ((strcmp(dir->files[i]->name, file_name) == 0)
-		&& (strcmp(dir->files[i]->extension, "page"))) {
+		if (
+		   (strcmp(dir->files[i]->name, file_name) == 0)
+		&& (strcmp(dir->files[i]->extension, "page") == 0)
+	) {
 			return 1;
-		}
+	  }
 	}
 
 	return 0;

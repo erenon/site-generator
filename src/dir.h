@@ -8,6 +8,11 @@
 #define DIR_H_
 
 /**
+ * Max length of indexed file names
+ */
+#define DIR_MAX_LINE_LENGTH 1024
+
+/**
  * Represents a file on the filesystem
  */
 typedef struct _File {
@@ -38,8 +43,8 @@ typedef struct _Dir {
 
 Dir *dir_create(char path[], STATUS *s);
 void dir_print(Dir *dir);
-void dir_delete(Dir *dir);
-void dir_map_by_ext(Dir *dir, char *ext, void (*callback)(File *));
 STATUS dir_write(Dir *dir, char *path);
+int dir_is_page(char *file_name);
+void dir_delete(Dir *dir);
 
 #endif /* DIR_H_ */
