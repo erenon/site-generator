@@ -174,6 +174,7 @@ Dir *dir_create(char *path, STATUS *s) {
 	return dir;
 }
 
+#if DEBUG
 /**
  * Prints the contents of the dir
  * Debug purposes only
@@ -189,6 +190,7 @@ void dir_print(Dir *dir) {
 		printf("%s\n\n",dir->files[i]->content);
 	}
 }
+#endif
 
 /**
  *

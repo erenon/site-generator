@@ -42,9 +42,14 @@ typedef struct _Dir {
 #include "genlib.h"
 
 Dir *dir_create(char path[], STATUS *s);
-void dir_print(Dir *dir);
 STATUS dir_write(Dir *dir, char *path);
 int dir_is_page(char *file_name);
 void dir_delete(Dir *dir);
+
+#if DEBUG
+
+void dir_print(Dir *dir);
+
+#endif
 
 #endif /* DIR_H_ */
