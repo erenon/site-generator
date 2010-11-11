@@ -1,8 +1,5 @@
 /*
  * @author erenon
- *
- * @todo a csereberélő fgvények megfektethetőek, ha
- * a csere is tartalmaz cserélendőt. (?)
  */
 
 #include <stdio.h>
@@ -95,8 +92,6 @@ static void format_text_bold(char **text) {
  * @param **text Source to search in
  *
  * @example format_text_link.c
- *
- * @todo handle local and remote links
  */
 static void format_text_link(char **text) {
 	char *bbss = "[link:",
@@ -308,6 +303,9 @@ static void replace_placeholder(char **layout, char *placeholder, char *replacet
 
 				/*reset*/
 				tlen = strlen(*layout);
+
+				/*skip included content*/
+				i += strlen(replaceto);
 			}
 		}
 	}
