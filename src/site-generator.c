@@ -9,6 +9,15 @@
 #include "dir.h"
 #include "generator.h"
 
+/**
+ * Looks for input path in the given string array,
+ * and stores it in the given string.
+ * Uses default "./" if no input path found.
+ *
+ * @param[out] *input_path
+ * @param[in] argc size of argv
+ * @param[in] *argv[]
+ */
 static void set_input_path(char *input_path, int argc, char *argv[]) {
 	if (argc >= 2) {
 		strcpy(input_path, argv[1]);
@@ -17,6 +26,15 @@ static void set_input_path(char *input_path, int argc, char *argv[]) {
 	}
 }
 
+/**
+ * Looks for output path in the given string array,
+ * and stores it in the given string.
+ * Uses default "./" if no output path found.
+ *
+ * @param[out] *output_path
+ * @param[in] argc size of argv
+ * @param[in] *argv[]
+ */
 static void set_output_path(char *output_path, int argc, char *argv[]) {
 	if (argc >= 3) {
 		strcpy(output_path, argv[2]);
@@ -25,6 +43,16 @@ static void set_output_path(char *output_path, int argc, char *argv[]) {
 	}
 }
 
+/**
+ * Looks for the path of the separate image directory
+ * in the given string array,
+ * and stores it in the given string.
+ * Uses default empty string if no image path found.
+ *
+ * @param[out] *img_dir
+ * @param[in] argc size of argv
+ * @param[in] *argv[]
+ */
 static void set_img_dir(char *img_dir, int argc, char *argv[]) {
 	int i;
 
@@ -43,6 +71,14 @@ static void set_img_dir(char *img_dir, int argc, char *argv[]) {
 	return;
 }
 
+/**
+ * Site generator
+ *
+ * Creates formatted HTML pages from plaintext files.
+ *
+ * USAGE:
+ * site-generator input_directory/ output_directory/ [--img img_directory/]
+ */
 int main(int argc, char *argv[]) {
 	Dir *dir;
 	char input_path[MAX_PATH_LENGTH],
@@ -56,7 +92,7 @@ int main(int argc, char *argv[]) {
 
 	dir = dir_create(input_path, &s);
 
-	if (s == STATUS_CODE_FAILED) {
+	if (s == STATUS_FAILED) {
 		fprintf(stderr, "Failed to read index! Aborting...\n");
 		return EXIT_FAILURE;
 	}
@@ -69,7 +105,7 @@ int main(int argc, char *argv[]) {
 
 	s = dir_write(dir, output_path);
 
-	if (s == STATUS_CODE_FAILED) {
+	if (s == STATUS_FAILED) {
 		fprintf(
 			stderr,
 			"Unable to write one or more file. Does the given dir '%s' exist?\n",

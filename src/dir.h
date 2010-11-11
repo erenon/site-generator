@@ -1,7 +1,5 @@
 /*
  * @author erenon
- *
- * @todo wrap ifdebug around dir_print
  */
 
 #ifndef DIR_H_
@@ -21,9 +19,14 @@ typedef struct _File {
 	char *content; 	 /**< full content of the file */
 } File;
 
+/**
+ * Represents the layout status of a Dir
+ * @see Dir
+ * @see has_layout
+ */
 typedef enum _DIR_LAYOUT {
-	UNINITIALIZED = -2,
-	NO_LAYOUT = -1
+	UNINITIALIZED = -2,	/**< layout is uninitalized, default state */
+	NO_LAYOUT = -1		/**< no layout found */
 } DIR_LAYOUT;
 
 /**

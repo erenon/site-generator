@@ -15,21 +15,29 @@ void sfree(void *pointer);
 
 /**
  * Status
+ * Represents the resoult of a function call.
  */
 typedef enum _STATUS {
-	STATUS_SUCC,
-	STATUS_CODE_FAILED
+	STATUS_SUCC,		/**< If the call was successful */
+	STATUS_FAILED  /**< If the call has encountered a problem */
 } STATUS;
 
 #include "dir.h"
 
+/**
+ * Configuration struct
+ * Contains all the global configuration fields
+ * needed by the application.
+ */
 typedef struct _CONFIG {
-	Dir *dir;
-	char img_dir[MAX_PATH_LENGTH];
+	Dir *dir;	/**< Pointer to the current directory */
+	char img_dir[MAX_PATH_LENGTH];	/**< Path of the separate image directory */
 } CONFIG;
 
 /**
  * GLOBAL variable
+ * This global configuration variable holds
+ * user defined configuration entries
  */
 CONFIG g_cfg;
 

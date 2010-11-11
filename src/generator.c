@@ -13,8 +13,7 @@
  * int the given text. The change is in place.
  *
  * @param[in,out] **text Source and target in the same time
- * @param[in] bbstart Opening tag to replace
- * @param[in] bbend Closing tag to replace
+ * @param[in] bbsep BBCode separator
  * @param[in] *htmlstart Opening html tag
  * @param[in] *htmlend Closing html tag
  *
@@ -262,6 +261,12 @@ static void format_text(char **text) {
 }
 
 /**
+ * Determines whether the given dir has a
+ * layout or doesn't. Searches for the layout,
+ * if the dir's layout index is UNINITIALIZED.
+ *
+ * @param *dir
+ * @return 1 if layout found, 0 otherwise
  */
 static int has_layout(Dir *dir) {
 	int i;
@@ -278,6 +283,14 @@ static int has_layout(Dir *dir) {
 	return (dir->layout_index >= 0) ? 1 : 0;
 }
 
+/**
+ * Replaces the given placeholder to the given replacement
+ * in the given layout.
+ *
+ * @param[in,out] **layout Text to search in
+ * @param[in] *placeholder to replace
+ * @param[in] *replaceto replacement
+ */
 static void replace_placeholder(char **layout, char *placeholder, char *replaceto) {
 	int i, tlen, placelen, addlen;
 	char *newlayout = NULL;
@@ -311,10 +324,37 @@ static void replace_placeholder(char **layout, char *placeholder, char *replacet
 	}
 }
 
+/**
+ * Calculates the total length of a navigation item
+ * based on the given name.
+ *
+ * @warning This function contains magic numbers defined by get_navigation_item.
+ * The length of the wrapper tags may change!
+ *
+ * @see get_navigation_item
+ *
+ * @param *page_name The name of the item (occurs twice)
+ * @return length of the navigation item
+ */
 static int get_navigation_item_length(char *page_name) {
 	return 13 + strlen(page_name)*2 + 7 + 9;
 }
 
+/**
+ * Creates a navigation item based on the given name
+ *
+ * Suffixes the name with .html if the given name matches
+ * to a local page. Prefixes the name with http:// if the
+ * name points to a remote target.
+ *
+ * @verbatim
+Example input: about_me
+Example output: <li><a href="about_me.html">about_me</a></li>
+@endverbatim
+ *
+ * @param *page_name The name of the item
+ * @return The assembled navigation item
+ */
 static char *get_navigation_item(char *page_name) {
 	char *itemss = "<li><a href=\"";
 	char *itemse = ".html\">";
@@ -342,6 +382,16 @@ static char *get_navigation_item(char *page_name) {
 	return item;
 }
 
+/**
+ * Searches for {navigation} placeholder and
+ * replaces it to a navigation list in the given text.
+ *
+ * @see get_navigation_item_length
+ * @see get_navigation_item
+ * @see replace_placeholder
+ *
+ * @param **text Text to search in
+ */
 static void embed_navigation(char **text) {
 	char *navboxs = "<ul>", *navboxe = "</ul>", *navigation, *item;
 	int i, navboxlen, itemslen;
@@ -379,6 +429,12 @@ static void embed_navigation(char **text) {
 }
 
 /*
+ * Generates the backbone of the pages.
+ *
+ * Formats the links, image references,
+ * embeds navigation, and widgets
+ *
+ * @param *dir Container dir of the layout to process
  */
 static void process_layout(Dir *dir) {
 	int i;
@@ -416,6 +472,16 @@ static void process_layout(Dir *dir) {
 	}
 }
 
+/**
+ * Copies the given content into the given layout
+ * at the position of the {content} placeholder,
+ * and stores the resoult in the content.
+ * This way the content will be embeded into the layout
+ * and no modification will be done on the layout string.
+ *
+ * @param **content The content to wrap
+ * @param *layout The layout to embed into
+ */
 static void embed_into_layout(char **content, char *layout) {
 	char *placeholder = "{content}", *newcontent = NULL;
 	int i, laylen, placelen, addlen;
@@ -447,6 +513,8 @@ static void embed_into_layout(char **content, char *layout) {
 /**
  * Processes all the widget files in the given dir.
  *
+ * @see format_text
+ *
  * @param *dir
  */
 void generator_process_widgets(Dir *dir) {
@@ -459,10 +527,25 @@ void generator_process_widgets(Dir *dir) {
 	}
 }
 
+/**
+ * Simple exposed wrapper around process_layout.
+ *
+ * @see process_layout
+ *
+ * @param *dir Directory that contains the layout to process
+ */
 void generator_process_layout(Dir *dir) {
 	process_layout(dir);
 }
 
+/**
+ * Processes all the pages in the given directory
+ *
+ * @see format text
+ * @see embed_into_layout
+ *
+ * @param *dir Directory to process
+ */
 void generator_process_pages(Dir *dir) {
 	int i;
 	char *layout = NULL;
@@ -479,7 +562,7 @@ void generator_process_pages(Dir *dir) {
 			/*embed into layout*/
 			if (layout != NULL) {
 				embed_into_layout(
-						&(dir->files[i])->content,
+					&(dir->files[i])->content,
 					layout
 				);
 			}

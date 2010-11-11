@@ -106,7 +106,7 @@ static /*@null@*/ File *read_file(char *path, char *fname) {
  *
  * @param *dir Dir to read
  *
- * @return STATUS_SUCC or STATUS_CODE_FAILED if failed to read index
+ * @return STATUS_SUCC or STATUS_FAILED if failed to read index
  */
 static STATUS read(Dir *dir) {
 	FILE *index = NULL;
@@ -120,7 +120,7 @@ static STATUS read(Dir *dir) {
 
 	index = fopen(dir_index, "rt");
 	if (index == NULL) {
-	    return STATUS_CODE_FAILED;
+	    return STATUS_FAILED;
 	}
 
 	while (fgets(file_name, DIR_MAX_LINE_LENGTH, index) != NULL) {
@@ -193,7 +193,10 @@ void dir_print(Dir *dir) {
 #endif
 
 /**
+ * Writes the given file to the given path
  *
+ * @param *file File to write out
+ * @param *path Target path
  */
 static STATUS file_write(File *file, char *path) {
 	FILE *fp;
@@ -212,7 +215,7 @@ static STATUS file_write(File *file, char *path) {
 	if (fp == NULL) {
 		fprintf(stderr, "Failed to write '%s', file skipped.\n", file_name);
 		sfree(file_name);
-		return STATUS_CODE_FAILED;
+		return STATUS_FAILED;
 	}
 
 	(void)fwrite(file->content, sizeof(char), strlen(file->content), fp);
@@ -226,7 +229,12 @@ static STATUS file_write(File *file, char *path) {
 /**
  * Writes the given dir to the filesystem
  *
- * @param[out] *dir Dir to write out
+ * @see file_write
+ *
+ * @param[in] *dir Dir to write out
+ * @param[in] *path Target path
+ * @return STATUS STATUS_SUCC if write of all the
+ * contained files was successful, STATUS_FAILED otherwise
  */
 STATUS dir_write(Dir *dir, char *path) {
 	int i;
@@ -235,8 +243,8 @@ STATUS dir_write(Dir *dir, char *path) {
 	for (i=0; i < dir->files_count; i++) {
 		if ( strcmp(dir->files[i]->extension, "page") == 0) {
 			curr_s = file_write(dir->files[i], path);
-			if (curr_s == STATUS_CODE_FAILED) {
-				s = STATUS_CODE_FAILED;
+			if (curr_s == STATUS_FAILED) {
+				s = STATUS_FAILED;
 			}
 		}
 	}
@@ -244,6 +252,13 @@ STATUS dir_write(Dir *dir, char *path) {
 	return s;
 }
 
+/**
+ * Determines whether the given name is an
+ * indexed page or not.
+ *
+ * @param *file_name The name of the file, without extension
+ * @return 1 if registered page, 0 otherwise
+ */
 int dir_is_page(char *file_name) {
 	Dir *dir;
 	int i;

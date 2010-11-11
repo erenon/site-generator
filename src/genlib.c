@@ -11,7 +11,7 @@
  *
  * @warning Aborts if out of memory
  *
- * @param size requested memory size
+ * @param size requested memory size in bytes
  */
 void *smalloc(size_t size) {
 	void *p = NULL;
@@ -30,6 +30,8 @@ void *smalloc(size_t size) {
  * and sets it's value to null.
  *
  * Prints error if null pointer given
+ *
+ * @param *pointer A pointer to free
  */
 void sfree(void *pointer) {
 	if (pointer != NULL) {
