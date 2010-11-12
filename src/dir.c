@@ -168,6 +168,7 @@ Dir *dir_create(char *path, STATUS *s) {
 	dir->file_to_process_count = 0;
 	dir->files_count = 0;
 	dir->layout_index = UNINITIALIZED;
+	dir->files = NULL;
 
 	*s = read(dir);
 
@@ -304,7 +305,10 @@ void dir_delete(Dir *dir) {
 	for (i=0; i < dir->files_count; i++) {
 		file_delete(dir->files[i]);
 	}
-	sfree(dir->files);
+
+	if (dir->files != NULL) {
+		sfree(dir->files);
+	}
 
 	sfree(dir);
 }

@@ -94,6 +94,7 @@ int main(int argc, char *argv[]) {
 
 	if (s == STATUS_FAILED) {
 		fprintf(stderr, "Failed to read index! Aborting...\n");
+		dir_delete(dir);
 		return EXIT_FAILURE;
 	}
 
