@@ -16,10 +16,66 @@
 \tableofcontents
 
 \section{Bevezető}
-\section{Könyvtárstruktúra}
-\section{Fájltípusok} %subsections: page, widget
-\section{Formázás}
-\section{Layout rendszer}
 
+\section{Könyvtárstruktúra}
+A fájl futtatása során a bemeneten specifikálhatunk egy forrás mappát, mely alapértelmezetten az aktuális könyvtár. 
+
+\texttt{> site-generator input-directory/}
+
+A weboldal ebben a könyvtárban található fájlok alapján fog elkészülni. Minden forráskönyvtár gyökerében léteznie kell egy index fájlnak, melyben a feldolgozandó fájlokat listázzuk.
+
+A bemeneten specifikálhatjuk a célkönyvtárat is. Ide fogja a program másolni az elkészített HTML fájlokat.
+
+\texttt{> site-generator input-directory/ output-directory/}
+
+Lehetőség van a generált HTML fájlokba képeket is beilleszteni, melyek külön fájlokat alkotnak. A beillesztendő képeket célszerű a célkönyvtárban tárolni, hogy a böngésző a könyvtár esetleges áthelyezése után is (például célszerverre másolás) meg tudja jeleníteni a beillesztett képeket.
+Ha nem szeretnénk összekeverni a generált HTML fájlokat a beillesztendő képekkel, lehetőség van külön képkönyvtár specifikálására, az \texttt{--img} kapcsoló segítségével.
+
+\texttt{> site-generator input-directory/ output-directory/ --img images/}
+
+A megadott képkönyvtár a kimenetihez képest relatív, tehát a fenti példa feltételezi, hogy az \emph{images} könyvtár az \emph{output-directory} eleme.
+Amennyiben nem specifikálunk be- és kimeneti könyvtárat, nincs lehetőség a képkönyvtár meghatározására sem.
+
+%figure: könyvtárstruktúra%
+
+
+\section{Fájltípusok} %subsections: index, layout, page, widget
+A bemeneti könyvtár különbböző kiterjesztésű, struktúrűjú fájlokat tartalmazhat. Ezek szervezése egyszerű, funkciójuk logikai alapon különválasztott.
+
+\subsection{Index fájl}
+A bemeneti könyvtárnak minden esetben kötelező tartalmaznia egy úgynevezett index fájlt. Ez a fájl teszi lehetővé, hogy a program feldolgozzon minden olyan fájlt, amelyekből a kész weboldalt előállítja.
+Az index fájlnak tehát tartalmaznia kell minden szükséges fájl nevét, soronként pontosan egyet.
+
+%example
+about-me.widget \\
+footer.widget \\
+about.page \\
+contact.page \\
+works.page \\
+%example
+
+Amennyiben a program nem találja az \emph{index} nevű fájlt a bemeneti könyvtár gyökerében, a következő hibaüzenet után kilép;
+
+\texttt{Failed to read index! Aborting...}
+
+Ekkor hozzuk létre az \emph{index} fájlt, vagy ha az már létezik, ellenőrozzük, hogy rendelkezik-e programunk a szükséges olvasási jogokkal.
+
+Amennyiben egy, az index fájlban definiált feldolgozandó fájl megnyitása vagy olvasása során a program akadályba ütközik, a következő hibaüzenet után folytatja a futást;
+
+\texttt{Failed to read file: 'file-name', file skipped.}
+
+Hozzuk létre a hiányolt fájlt, vagy - amennyiben nincs szükség rá - töröljük az indexbejegyzését.
+
+\subsection{Layout fájl}
+\subsection{Page fájlok}
+A .page kiterjesztésű fájlok alkotják a generált weboldal gerincét. Minden egyes ilyen fájl egy külön oldalt reprezentál a kész generátumban. Lehetőség van a szöveg formázására, erről a \ref{sec:format}. fejezetben olvashatunk többet.
+Praktikus szempontokból fontos, hogy minden oldalon ismétlődő részeket ne illesszünk be .page fájljainkba, hanem tároljuk őket külön a \emph{layout}ban vagy \emph{widget}ekben, elkerülve így a felesleges kódduplikálást.
+\subsection{widget}
+Widgetek segítségével oldalunkat kisebb, önálló logikai egységekre tagolhatjuk, mely egységeket a \emph{layout} tetszőleges pontjára beilleszthetünk. Így lehetőség nyílik a gyakrabban használt oldalelemek duplikálásának elkerülésére.
+\section{Formázás}
+\label{sec:format}
+\section{Layout rendszer}
+\subsection{Navigáció}
+\subsection{Widgetek beillesztése}
 
 \end{document}
