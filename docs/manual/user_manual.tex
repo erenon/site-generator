@@ -45,7 +45,7 @@ $ site-generator input-directory/ output-directory/ --img images/
 \end{lstlisting}
 
 A megadott képkönyvtár a kimenetihez képest relatív, tehát a fenti példa feltételezi, hogy az \emph{images} könyvtár az \emph{output-directory} eleme.
-Amennyiben nem specifikálunk be- és kimeneti könyvtárat, nincs lehetőség a képkönyvtár meghatározására sem.
+Amennyiben nem specifikálunk be- és kimeneti könyvtárat, nincs lehetőség a képkönyvtár meghatározására sem. A megadott útvonalak végéről a lezáró / nem elhagyható!
 
 \begin{figure}[h]
 	\begin{center}
@@ -56,10 +56,10 @@ Amennyiben nem specifikálunk be- és kimeneti könyvtárat, nincs lehetőség a
 
 
 \section{Fájltípusok}
-A bemeneti könyvtár különbböző kiterjesztésű, struktúrűjú fájlokat tartalmazhat. Ezek szervezése egyszerű, funkciójuk logikai alapon különválasztott.
+A bemeneti könyvtár különböző kiterjesztésű, struktúrájú fájlokat tartalmazhat. Ezek szervezése egyszerű, funkciójuk logikai alapon különválasztott.
 
 \subsection{Index fájl}
-A bemeneti könyvtárnak minden esetben kötelező tartalmaznia egy úgynevezett index fájlt. Ez a fájl teszi lehetővé, hogy a program feldolgozzon minden olyan fájlt, amelyekből a kész weboldalt előállítja.
+A bemeneti könyvtárnak minden esetben kötelező tartalmaznia egy úgynevezett index fájlt. Ez az állomány teszi lehetővé, hogy a program feldolgozzon minden olyan fájlt, amelyekből a kész weboldalt előállítja.
 Az index fájlnak tehát tartalmaznia kell minden szükséges fájl nevét, soronként pontosan egyet.
 
 \begin{wrapfigure}{r}{0.3\textwidth}
@@ -86,7 +86,7 @@ Amennyiben a program nem találja az \emph{index} nevű fájlt a bemeneti könyv
 Failed to read index! Aborting...
 \end{lstlisting}
 
-Ekkor hozzuk létre az \emph{index} fájlt, vagy ha az már létezik, ellenőrozzük, hogy rendelkezik-e programunk a szükséges olvasási jogokkal.
+Ekkor hozzuk létre az \emph{index} fájlt, vagy ha az már létezik, ellenőrozzük, hogy rendelkezik-e programunk a szükséges olvasási jogokkal, illetve hogy helyesen specifikáltuk-e a forráskönyvtárat.
 
 Amennyiben egy, az index fájlban definiált feldolgozandó fájl megnyitása vagy olvasása során a program akadályba ütközik, a következő hibaüzenet után folytatja a futást;
 
@@ -100,10 +100,10 @@ Hozzuk létre a hivatkozott fájlt, vagy -- amennyiben nincs szükség rá -- t�
 A layout fájlt definiálja a layout rendszer által haszált keretet, melyet bővebben az \ref{sec:layout}. fejezet mutat be. A layout fájl nem rendelkezik kiterjesztéssel, és gyakori, hogy program által biztosított formázási lehetőségeken túl más HTML jelölőket is használ.
 
 \subsection{Page fájlok}
-A .page kiterjesztésű fájlok alkotják a generált weboldal gerincét. Minden egyes ilyen fájl egy külön oldalt reprezentál a kész generátumban. Lehetőség van a szöveg formázására, erről a \ref{sec:format}. fejezetben olvashatunk többet.
-Praktikus szempontokból fontos, hogy minden oldalon ismétlődő részeket ne illesszünk be .page fájljainkba, hanem tároljuk őket külön a \emph{layout}ban vagy \emph{widget}ekben, elkerülve így a felesleges kódduplikálást.
+A \emph{.page} kiterjesztésű fájlok alkotják a generált weboldal gerincét. Minden egyes ilyen fájl egy külön oldalt reprezentál a kész generátumban. Lehetőség van a szöveg formázására, erről a \ref{sec:format}. fejezetben olvashatunk többet.
+Praktikus szempontokból fontos, hogy minden oldalon ismétlődő részeket ne illesszünk be .page fájljainkba, hanem tároljuk őket külön a \emph{layout}ban vagy \emph{widget}ekben, elkerülve így a felesleges tartalomduplikálást.
 \subsection{Widgetek}
-Widgetek segítségével oldalunkat kisebb, önálló logikai egységekre tagolhatjuk, mely egységeket a \emph{layout} tetszőleges pontjára beilleszthetünk. Így lehetőség nyílik a gyakrabban használt oldalelemek duplikálásának elkerülésére.
+Widgetek segítségével oldalunkat kisebb, önálló logikai egységekre tagolhatjuk, mely egységeket a \emph{layout} tetszőleges pontjára beilleszthetünk. Így lehetőség nyílik a gyakrabban használt oldalelemek duplikálásának elkerülésére. A widget fájlokban is használhatjuk a \ref{sec:format}. fejezetben ismertetett formázási lehetőségeket. A widget fájlokra fájlnevük alapján hivatkozhatunk, kiterjesztésük \emph{.widget}.
 \section{Formázás}
 \label{sec:format}
 Lehetőségünk van a generált HTML fájlok szövegformázására is, speciális HTML jelölők ismerete nélkül. Használatuk egyszerű; a megfelelő határolókarakterekkel kell körbevenni a szöveget a szövegkiemelés használatához. A \ref{table:textformat}. számú táblázat mutatja be a forrásfájlokban alkalmazható eszközök használatát és hatását.
@@ -152,7 +152,7 @@ Célszerű a képeinket a kimeneti könyvtárban tárolni, mivel azokat nem más
 
 \section{Layout rendszer}
 \label{sec:layout}
-A program által megvalósított \emph{layout} rendszer teszi lehetővé, hogy oldalaink számára egyszerre egységes és könnyen módosítható megjelenést biztosítsunk, tartalomduplikáció nélkül. A \emph{layout} egy keretet biztosít, mely minden oldalt körülvesz; gondolhatunk rá úgy, mint egy alaprajzra, mely meghatározza oldalunk főb elemeinek az elrendezését. Használatához hozzunk létre egy \emph{layout} nevű fájlt a forrásmappában, és adjuk hozzá az \emph{index} fájl listájához egy új sorban.
+A program által megvalósított \emph{layout} rendszer teszi lehetővé, hogy oldalaink számára egyszerre egységes és könnyen módosítható megjelenést biztosítsunk, tartalomduplikáció nélkül. A \emph{layout} egy keretet biztosít, mely minden oldalt körülvesz; gondolhatunk rá úgy, mint egy alaprajzra, mely meghatározza oldalunk főbb elemeinek az elrendezését. Használatához hozzunk létre egy \emph{layout} nevű fájlt a forrásmappában, és adjuk hozzá az \emph{index} fájl listájához egy új sorban.
 A program a feldolgozás során minden egyes oldal tartalmát beilleszti a \emph{layout}ban meghatározott helyre. Ezt a helyet egy speciális \emph{helyörző}vel tudjuk meghatározni, az ~\ref{fig:layout}. ábrán látható módon.
 
 \begin{figure}[h]
@@ -173,16 +173,15 @@ A program a feldolgozás során minden egyes oldal tartalmát beilleszti a \emph
 A példában a HTML oldal törzsébe, a \texttt{\{content\}} helyörző helyére fog bekerülni minden egyes oldal, külön-külön.
 
 \subsection{Navigáció}
-Oldalunk navigációját nehéz és körülményes lenne konzisztensen tartani, ha minden alkalommal, amikor új oldalt hozunk létre, módosítanunk kéne a navigációt is. A probléma megoldására a \emph{layout} rendszer nyújt megoldást: helyezzük el a \texttt{\{navigation\}} helyörzőt a \emph{layout} fájlunk tetszőleges pontjára. Programunk minden egyes oldal esetében egy menürendszert fog generálni, melynek elemei weboldalunk különböző oldalaira mutatnak.
+Oldalunk navigációját nehéz és körülményes lenne konzisztensen tartani, ha minden alkalommal, amikor új oldalt hozunk létre, módosítanunk kéne a navigációt is. A probléma megoldására a \emph{layout} rendszer nyújt megoldást: helyezzük el a \texttt{\{navigation\}} helyörzőt a \emph{layout} fájlunk tetszőleges pontjára. Programunk minden egyes oldal esetében egy menürendszert fog generálni a címke helyére, melynek elemei weboldalunk különböző oldalaira mutatnak.
 
 \subsection{Widgetek beillesztése}
 A \emph{widget}ek teszik lehetővé, hogy oldalunk ismétlődő részeit logikai egységekre bontva, külön tároljuk. Használatukhoz hozzunk létre egy tetszőleges nevű fájlt a forráskönyvtárban, \texttt{.widget} kiterjesztéssel, és a létrehozott fájlt adjuk hozzá \emph{index} fájlunkhoz egy új sorban. Az újonnan létrehozott \emph{widget}ünkre a fájl nevével tudunk hivatkozni. A ~\ref{fig:widget}. ábra mutatja be egy egyszerű widget használatát.
 
-\begin{figure}[h]
+\begin{figure}[h!]
 	\begin{center}
 		\begin{lstlisting}
 <html>
-	<head><title>My portfolio</title></head>
 	<body>
 		{content}
 	</body>
@@ -203,10 +202,20 @@ A project rendelkezik Makefile állománnyal, a főbb \emph{target}ek a követke
 \begin{description}
 	\item[all] Lefordítja a projectet a \emph{gcc} fordító használatával; a lefordított állomány a gyökérben jön létre, \texttt{site-generator} néven.
 
-	\item[sample] Létrehoz egy generátum mintát a program segítségével, melyet a \texttt{sample/output/} útvonalon találunk meg. Előfordulhat, hogy a tényleges végrehajtáshoz szükség van a \texttt{make -B} kapcsolójára.
+	\item[sample] Létrehoz egy generátum mintát a program segítségével, melyet a \texttt{sample/output/} útvonalon találunk meg. Előfordulhat, hogy a tényleges végrehajtáshoz szükség van a \texttt{make} program \texttt{-B} kapcsolójára.
 
-	\item[valgrind] Lefuttatja a valgrind nevű programot, mely analizálja a fordított állományt. Figyelem! Ez a \emph{target} egy speciális fejlesztőkörnyezethet (Eclipse CDT) van igazítva, a project alapértelmezett könyvtárstruktúrájával nem működik együtt. Használatához módosítsuk a \emph{target}et, vagy hozzunk létre egy \texttt{Debug} nevű könyvtárat egy fordított állománnyal és néhány példáfájllal.
+	\item[valgrind] Lefuttatja a valgrind nevű programot, mely analizálja a fordított állományt. Figyelem! Ez a \emph{target} egy speciális fejlesztőkörnyezethez (Eclipse CDT) van igazítva, a project alapértelmezett könyvtárstruktúrájával nem működik együtt. Használatához módosítsuk a \emph{target}et, vagy hozzunk létre egy \texttt{Debug} nevű könyvtárat egy fordított állománnyal és néhány példáfájllal.
 \end{description}
+
+\begin{figure}[h!]
+		\begin{lstlisting}
+$ make all
+		\end{lstlisting}
+		\caption{Program fordítása \texttt{make} segítségével}
+		\label{fig:makeexample}
+\end{figure}
+
+A Makefile feladatok a \texttt{make target\_name} formátumú konzolparanccsal futtathatóak, lásd ~\ref{fig:makeexample}. ábra.
 
 Ezentúl a gyökérben található egy rövid \emph{README.md} nevű szöveges fájl is, mely a program rövid leírását tartalmazza. A project könyvtára több alkönyvtárra van tagolva a jobb áttekinthetőség érdekében.
 
@@ -223,12 +232,12 @@ A \emph{dir} modul gondoskodik a forrás- és célkönyvtár kezeléséről, az 
 A két fő adatstruktúra a következő:
 
 \begin{description}
-	\item[Dir] Egy -- a fájlrendszeren tárolt -- könyvtárat reprezentál a memóriában. Nyilvántartja az indexelt és az elérhető fájlok számát, és a beolvasott fileokat is, pointereken keresztül.
+	\item[Dir] Egy -- a fájlrendszeren tárolt -- könyvtárat reprezentál a memóriában. Nyilvántartja az indexelt és az elérhető fájlok számát, valamint a beolvasott fileokat, pointereken keresztül.
 	\item[File] Jellemzően a Dir struktúra egy példányán keresztül érhető el, egy fájlrendszerbeli fájlt reprezentál. Nyilvántartja a fájl nevét, kiterjesztését és tartalmát.
 \end{description}
 
 \subsubsection{generator modul -- fájlok feldolgozása}
-A \emph{generator} modul gondoskodik a beolvasott fájlok megfelelő transzformációjáról. A \ref{sec:format}. fejezetben ismertetett módon definiált formázásokat átalakítja HTML megfelelőikké, beilleszti a \emph{layout} fájlba a \emph{widget}eket és a formázott oldalakat körülveszi a \emph{layout} sablonnal.
+A \emph{generator} modul gondoskodik a beolvasott fájlok megfelelő transzformációjáról. Az átadott fájlok \ref{sec:format}. fejezetben ismertetett módon definiált formázásait átalakítja HTML megfelelőikké, beilleszti a \emph{layout} fájlba a \emph{widget}eket és a formázott oldalakat körülveszi a \emph{layout} sablonnal.
 
 \subsubsection{genlib modul -- háttérműveletek}
 Megvalósítja a \emph{void *smalloc(size\_t)} valamint a \emph{void sfree(void*)} függvényeket, melyek kényelmes burkolót biztosítanak a hasonló nevű szabványos függvényekhez. Ezentúl definiál egy \texttt{CONFIG} struktúrát, és létrehozza egy globális példányát. A konfigurációs rész nincs feleslegesen túlbonyolítva egyke mintát megvalósító -- a konfigurációt kezelő -- függvényekkel, így a létrehozott \texttt{g\_cfg} globális változót a megfelelő körültekintéssel kell kezelni.
