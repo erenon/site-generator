@@ -3,6 +3,9 @@
 \usepackage[utf8]{inputenc}
 \usepackage[hungarian]{babel}
 \usepackage{lmodern}
+\usepackage{listings}
+\usepackage{wrapfig}
+\usepackage{graphicx}
 
 \title{Site generator felhasználói kézikönyv}
 \author{Thaler Benedek}
@@ -16,66 +19,183 @@
 \tableofcontents
 
 \section{Bevezető}
+A program lehetővé teszi HTML fájlok generálását nyers szövegfájlokból, nem igényelve semmilyen HTML jelölőnyelvi ismeretet a felhasználó részéről. Támogat alapvető formázásokat, hivatkozások és képek beszúrását, továbbá megvalósít egy \emph{layout} rendszert, mely lehetővé teszi az oldalak sablonba illesztését.
+A program parancssorból futtatható, hibamentes futás esetén nem ír a \emph{standard} kimenetre. Az esetleges problémákat a meghatározott hibakimeneten (\emph{stderr}) jelzi.
 
 \section{Könyvtárstruktúra}
 A fájl futtatása során a bemeneten specifikálhatunk egy forrás mappát, mely alapértelmezetten az aktuális könyvtár. 
 
-\texttt{> site-generator input-directory/}
+\begin{lstlisting}[language=bash]
+$ site-generator input-directory/
+\end{lstlisting}
 
 A weboldal ebben a könyvtárban található fájlok alapján fog elkészülni. Minden forráskönyvtár gyökerében léteznie kell egy index fájlnak, melyben a feldolgozandó fájlokat listázzuk.
 
 A bemeneten specifikálhatjuk a célkönyvtárat is. Ide fogja a program másolni az elkészített HTML fájlokat.
 
-\texttt{> site-generator input-directory/ output-directory/}
+\begin{lstlisting}[language=bash]
+$ site-generator input-directory/ output-directory/
+\end{lstlisting}
 
 Lehetőség van a generált HTML fájlokba képeket is beilleszteni, melyek külön fájlokat alkotnak. A beillesztendő képeket célszerű a célkönyvtárban tárolni, hogy a böngésző a könyvtár esetleges áthelyezése után is (például célszerverre másolás) meg tudja jeleníteni a beillesztett képeket.
 Ha nem szeretnénk összekeverni a generált HTML fájlokat a beillesztendő képekkel, lehetőség van külön képkönyvtár specifikálására, az \texttt{--img} kapcsoló segítségével.
 
-\texttt{> site-generator input-directory/ output-directory/ --img images/}
+\begin{lstlisting}[language=bash]
+$ site-generator input-directory/ output-directory/ --img images/
+\end{lstlisting}
 
 A megadott képkönyvtár a kimenetihez képest relatív, tehát a fenti példa feltételezi, hogy az \emph{images} könyvtár az \emph{output-directory} eleme.
 Amennyiben nem specifikálunk be- és kimeneti könyvtárat, nincs lehetőség a képkönyvtár meghatározására sem.
 
-%figure: könyvtárstruktúra%
+\begin{figure}[h]
+	\begin{center}
+		\includegraphics[scale=0.5]{dirtree}
+		\caption{Példa forrás mappa}
+	\end{center}
+\end{figure}
 
 
-\section{Fájltípusok} %subsections: index, layout, page, widget
+\section{Fájltípusok}
 A bemeneti könyvtár különbböző kiterjesztésű, struktúrűjú fájlokat tartalmazhat. Ezek szervezése egyszerű, funkciójuk logikai alapon különválasztott.
 
 \subsection{Index fájl}
 A bemeneti könyvtárnak minden esetben kötelező tartalmaznia egy úgynevezett index fájlt. Ez a fájl teszi lehetővé, hogy a program feldolgozzon minden olyan fájlt, amelyekből a kész weboldalt előállítja.
 Az index fájlnak tehát tartalmaznia kell minden szükséges fájl nevét, soronként pontosan egyet.
 
-%example
-about-me.widget \\
-footer.widget \\
-about.page \\
-contact.page \\
-works.page \\
-%example
+\begin{wrapfigure}{r}{0.3\textwidth}
+		\centering
+		\fbox{
+			\begin{minipage}[b]{1.1in}
+
+			about-me.widget \\
+			footer.widget \\
+			layout \\
+			about.page \\
+			contact.page \\
+			works.page \\
+			index.page
+
+			\end{minipage}
+		}
+		\caption{Példa index fájl}
+\end{wrapfigure}
 
 Amennyiben a program nem találja az \emph{index} nevű fájlt a bemeneti könyvtár gyökerében, a következő hibaüzenet után kilép;
 
-\texttt{Failed to read index! Aborting...}
+\begin{lstlisting}
+Failed to read index! Aborting...
+\end{lstlisting}
 
 Ekkor hozzuk létre az \emph{index} fájlt, vagy ha az már létezik, ellenőrozzük, hogy rendelkezik-e programunk a szükséges olvasási jogokkal.
 
 Amennyiben egy, az index fájlban definiált feldolgozandó fájl megnyitása vagy olvasása során a program akadályba ütközik, a következő hibaüzenet után folytatja a futást;
 
-\texttt{Failed to read file: 'file-name', file skipped.}
+\begin{lstlisting}
+Failed to read file: 'file-name', file skipped.
+\end{lstlisting}
 
-Hozzuk létre a hiányolt fájlt, vagy - amennyiben nincs szükség rá - töröljük az indexbejegyzését.
+Hozzuk létre a hivatkozott fájlt, vagy -- amennyiben nincs szükség rá -- töröljük az indexbejegyzését.
 
 \subsection{Layout fájl}
+A layout fájlt definiálja a layout rendszer által haszált keretet, melyet bővebben az \ref{sec:layout}. fejezet mutat be. A layout fájl nem rendelkezik kiterjesztéssel, és gyakori, hogy program által biztosított formázási lehetőségeken túl más HTML jelölőket is használ.
+
 \subsection{Page fájlok}
 A .page kiterjesztésű fájlok alkotják a generált weboldal gerincét. Minden egyes ilyen fájl egy külön oldalt reprezentál a kész generátumban. Lehetőség van a szöveg formázására, erről a \ref{sec:format}. fejezetben olvashatunk többet.
 Praktikus szempontokból fontos, hogy minden oldalon ismétlődő részeket ne illesszünk be .page fájljainkba, hanem tároljuk őket külön a \emph{layout}ban vagy \emph{widget}ekben, elkerülve így a felesleges kódduplikálást.
-\subsection{widget}
+\subsection{Widgetek}
 Widgetek segítségével oldalunkat kisebb, önálló logikai egységekre tagolhatjuk, mely egységeket a \emph{layout} tetszőleges pontjára beilleszthetünk. Így lehetőség nyílik a gyakrabban használt oldalelemek duplikálásának elkerülésére.
 \section{Formázás}
 \label{sec:format}
+Lehetőségünk van a generált HTML fájlok szövegformázására is, speciális HTML jelölők ismerete nélkül. Használatuk egyszerű; a megfelelő határolókarakterekkel kell körbevenni a szöveget a szövegkiemelés használatához. A \ref{table:textformat}. számú táblázat mutatja be a forrásfájlokban alkalmazható eszközök használatát és hatását.
+
+\begin{table}[h!]
+  \begin{center}
+    \begin{tabular}{| l | l |}
+    \hline
+    Forrás szöveg & Eredmény \\
+    \hline \hline
+    \_dőlt\_ & \textit{dőlt} \\
+    \hline
+    \*félkövér\* & \textbf{félkövér} \\
+    \hline
+    \end{tabular}
+  \end{center}
+  \caption{Szövegformázás}
+  \label{table:textformat}
+\end{table}
+
+\subsection{Linkek beszúrása}
+Szövegünkben használhatunk \emph{link}eket (hiperhivatkozásokat), melyek oldalunk más részeire, vagy külső weboldalakra, internetes forrásokra mutatnak. A linkelni kívánt szöveget egy speciális jelölővel kell körülvenni, melyben meg kell határozni a link célját.
+
+\begin{figure}[h]
+	\begin{center}
+		[link:about]About me[/l]
+		\caption{Belső oldalra mutató link, célja: \emph{about.html}}
+		\label{fig:loclink}
+	\end{center}
+\end{figure}
+
+A ~\ref{fig:loclink}. ábrában látható módon tudunk létrehozni szövegünkben hivatkozásokat. Amennyiben a link célja megegyezik egy általunk -- az index fájlban definiált -- oldal nevével, a hivatkozás lokális lesz; ellenkező esetben pedig külső oldalra fog mutatni.
+
+\subsection{Képek beszúrása}
+Természetesen lehetőség van képek beszúrására is. A ~\ref{fig:insimg}. ábrán látható módon illeszthető a megadott útvonalon található \emph{sample.png} nevű kép a szövegbe.
+
+\begin{figure}[h]
+	\begin{center}
+		[img:sample.png]
+		\caption{Kép beszúrása}
+		\label{fig:insimg}
+	\end{center}
+\end{figure}
+
+Célszerű a képeinket a kimeneti könyvtárban tárolni, mivel azokat nem másolja át a program a feldolgozás során. Így biztosak lehetünk abban, hogy a kész HTML oldalakon megjelenik majd a beillesztett kép.
+
 \section{Layout rendszer}
+\label{sec:layout}
+A program által megvalósított \emph{layout} rendszer teszi lehetővé, hogy oldalaink számára egyszerre egységes és könnyen módosítható megjelenést biztosítsunk, tartalomduplikáció nélkül. A \emph{layout} egy keretet biztosít, mely minden oldalt körülvesz; gondolhatunk rá úgy, mint egy alaprajzra, mely meghatározza oldalunk főb elemeinek az elrendezését. Használatához hozzunk létre egy \emph{layout} nevű fájlt a forrásmappában, és adjuk hozzá az \emph{index} fájl listájához egy új sorban.
+A program a feldolgozás során minden egyes oldal tartalmát beilleszti a \emph{layout}ban meghatározott helyre. Ezt a helyet egy speciális \emph{helyörző}vel tudjuk meghatározni, az ~\ref{fig:layout}. ábrán látható módon.
+
+\begin{figure}[h]
+	\begin{center}
+		\begin{lstlisting}
+<html>
+	<head><title>My portfolio</title></head>
+	<body>
+		{content}
+	</body>
+</html>
+		\end{lstlisting}
+		\caption{A \emph{layout} használata}
+		\label{fig:layout}
+	\end{center}
+\end{figure}
+
+A példában a HTML oldal törzsébe, a \texttt{\{content\}} helyörző helyére fog bekerülni minden egyes oldal, külön-külön.
+
 \subsection{Navigáció}
+Oldalunk navigációját nehéz és körülményes lenne konzisztensen tartani, ha minden alkalommal, amikor új oldalt hozunk létre, módosítanunk kéne a navigációt is. A probléma megoldására a \emph{layout} rendszer nyújt megoldást: helyezzük el a \texttt{\{navigation\}} helyörzőt a \emph{layout} fájlunk tetszőleges pontjára. Programunk minden egyes oldal esetében egy menürendszert fog generálni, melynek elemei weboldalunk különböző oldalaira mutatnak.
+
 \subsection{Widgetek beillesztése}
+A \emph{widget}ek teszik lehetővé, hogy oldalunk ismétlődő részeit logikai egységekre bontva, külön tároljuk. Használatukhoz hozzunk létre egy tetszőleges nevű fájlt a forráskönyvtárban, \texttt{.widget} kiterjesztéssel, és a létrehozott fájlt adjuk hozzá \emph{index} fájlunkhoz egy új sorban. Az újonnan létrehozott \emph{widget}ünkre a fájl nevével tudunk hivatkozni. A ~\ref{fig:widget}. ábra mutatja be egy egyszerű widget használatát.
+
+\begin{figure}[h]
+	\begin{center}
+		\begin{lstlisting}
+<html>
+	<head><title>My portfolio</title></head>
+	<body>
+		{content}
+	</body>
+	<side>
+		{widget:about-me.widget}
+	</side>
+</html>
+		\end{lstlisting}
+		\caption{Egy saját widget használata}
+		\label{fig:widget}
+	\end{center}
+\end{figure}
+
+
 
 \end{document}
