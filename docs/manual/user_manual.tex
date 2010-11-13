@@ -9,7 +9,7 @@
 
 \title{Site generator felhasználói kézikönyv}
 \author{Thaler Benedek}
-\date{November 2010}
+\date{2010. November}
 \begin{document}
 
 
@@ -197,5 +197,54 @@ A \emph{widget}ek teszik lehetővé, hogy oldalunk ismétlődő részeit logikai
 \end{figure}
 
 
+\section{Programozói dokumentáció}
+A project rendelkezik Makefile állománnyal, a főbb \emph{target}ek a következőek:
+
+\begin{description}
+	\item[all] Lefordítja a projectet a \emph{gcc} fordító használatával; a lefordított állomány a gyökérben jön létre, \texttt{site-generator} néven.
+
+	\item[sample] Létrehoz egy generátum mintát a program segítségével, melyet a \texttt{sample/output/} útvonalon találunk meg. Előfordulhat, hogy a tényleges végrehajtáshoz szükség van a \texttt{make -B} kapcsolójára.
+
+	\item[valgrind] Lefuttatja a valgrind nevű programot, mely analizálja a fordított állományt. Figyelem! Ez a \emph{target} egy speciális fejlesztőkörnyezethet (Eclipse CDT) van igazítva, a project alapértelmezett könyvtárstruktúrájával nem működik együtt. Használatához módosítsuk a \emph{target}et, vagy hozzunk létre egy \texttt{Debug} nevű könyvtárat egy fordított állománnyal és néhány példáfájllal.
+\end{description}
+
+Ezentúl a gyökérben található egy rövid \emph{README.md} nevű szöveges fájl is, mely a program rövid leírását tartalmazza. A project könyvtára több alkönyvtárra van tagolva a jobb áttekinthetőség érdekében.
+
+\begin{description}
+	\item[src] Tartalmazza az összes forrás- és fejlécállományt.
+	\item[docs] A projecttel szállított dokumentációk találhatóak itt. A \texttt{manual} alkönyvtárban található ezen dokumentáció forrása. A könyvtárban található \texttt{site-generator.doxyfile} állomány és a \emph{Doxygen} program segítségével állítható elő a programkód dokumentációja (\emph{apidoc}), mely alapértelmezetten ebben a könyvtárban jön létre, a forrásfájlok alapján. Ezen dokumentáció \emph{PDF} formátumban letölthető a project honlapjáról is \footnote{\texttt{https://github.com/downloads/erenon/site-generator/refman.pdf}}
+	\item[sample] Tartalmaz egy példát, mely ismerteti a program használatát, és létrehoz egy bemutató generátumot.
+\end{description}
+
+\subsection{Modulok}
+A program önálló modulokra van bontva, funkcionalitás szerint. Minden modul rendelkezik egy forrás és egy fejlécállománnyal, melyek \texttt{<modul-neve>.c} és \texttt{<modul-neve>.h} formátumúak. A modulok készítésénél szempont volt, hogy a lehető legkevesebb dologt feltételezzék egymásról, a lehető legszűkebb mértékű legyen a kívülről is elérhető függvények halmaza, továbbá a lehető legkevésbé támaszkodjanak egymás konkrét megvalósítására.
+\subsubsection{dir modul -- fájlkezelés}
+A \emph{dir} modul gondoskodik a forrás- és célkönyvtár kezeléséről, az indexelt fájlok memóriábaolvasásáról. Ezen modul definiálja a program két fő adatstruktúráját is, melyekhez biztosít konstruktor és destruktor függvényeket, egységbe zárva a fájlkezelést, és megszabadítva az őt felhasználó kódot az inicializálás és memóriafelszabadítás problémájától.
+A két fő adatstruktúra a következő:
+
+\begin{description}
+	\item[Dir] Egy -- a fájlrendszeren tárolt -- könyvtárat reprezentál a memóriában. Nyilvántartja az indexelt és az elérhető fájlok számát, és a beolvasott fileokat is, pointereken keresztül.
+	\item[File] Jellemzően a Dir struktúra egy példányán keresztül érhető el, egy fájlrendszerbeli fájlt reprezentál. Nyilvántartja a fájl nevét, kiterjesztését és tartalmát.
+\end{description}
+
+\subsubsection{generator modul -- fájlok feldolgozása}
+A \emph{generator} modul gondoskodik a beolvasott fájlok megfelelő transzformációjáról. A \ref{sec:format}. fejezetben ismertetett módon definiált formázásokat átalakítja HTML megfelelőikké, beilleszti a \emph{layout} fájlba a \emph{widget}eket és a formázott oldalakat körülveszi a \emph{layout} sablonnal.
+
+\subsubsection{genlib modul -- háttérműveletek}
+Megvalósítja a \emph{void *smalloc(size\_t)} valamint a \emph{void sfree(void*)} függvényeket, melyek kényelmes burkolót biztosítanak a hasonló nevű szabványos függvényekhez. Ezentúl definiál egy \texttt{CONFIG} struktúrát, és létrehozza egy globális példányát. A konfigurációs rész nincs feleslegesen túlbonyolítva egyke mintát megvalósító -- a konfigurációt kezelő -- függvényekkel, így a létrehozott \texttt{g\_cfg} globális változót a megfelelő körültekintéssel kell kezelni.
+
+\subsection{A program lefutásának vázlata}
+
+\begin{figure}[h]
+	\begin{center}
+		\includegraphics[scale=0.6]{flowuml}
+		\caption{A program lefutásának vázlata}
+		\label{fig:flow}
+	\end{center}
+\end{figure}
+
+A program lefutásának vázlata a ~\ref{fig:flow}. ábrán látható. A main függvény létrehozza a \texttt{Dir} példányt a konstruktorán keresztül, amit a \emph{dir} modul az átadott útvonal paraméter alapján inicializál, és feltölti a megfelelő beolvasott adatokkal.
+Ezután kerül sor a fájlok traszformálására a \emph{generator} modulon keresztül, először a \emph{widget}ek, majd a \emph{layout} és végül az oldalak kerülnek feldolgozásra.
+Az így előkészített könyvtárat a main függvény a \emph{dir} modulon keresztül kiírja a fájlrendszerre, végül a \texttt{Dir} destruktorának segítségével felszabadítja a lefoglalt memóriát.
 
 \end{document}
