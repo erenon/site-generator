@@ -1,8 +1,19 @@
 Weboldal generátor
 ==================
+
+Kipróbáláshoz töltsük le a projectet, és a letöltött könyvtár gyökerében állva adjuk ki a következő parancsokat:
+
+	$ make all
+	$ make sample -B
+	
+Majd nyissuk meg a `sample/output/Index.html` helyen létrejövő dokumentumot.
+
+Specifikáció
+------------
+
 A program lehetővé teszi, hogy nyers szöveges fájlokból formázott HTML oldalakat készítsünk; egységes megjelenéssel, menüvel és linkekkel.
 
-A program egy előre meghatározott tartalomjegyzékből olvassa be a fájlok neveit. (AFAIK nincs portable ansi dir list)
+A program egy előre meghatározott tartalomjegyzékből olvassa be a fájlok neveit.
 Ezután a feldolgozandó fájlok is beolvasásra kerülnek, és a kiterjesztésük alapján megtörténik a feldolgozásuk.
 A lehetséges típusok a következőek:
 
