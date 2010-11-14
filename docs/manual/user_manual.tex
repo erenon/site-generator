@@ -6,13 +6,12 @@
 \usepackage{listings}
 \usepackage{wrapfig}
 \usepackage{graphicx}
+\usepackage{multirow}
 
 \title{Site generator felhasználói kézikönyv}
 \author{Thaler Benedek}
 \date{2010. November}
 \begin{document}
-
-
 
 \maketitle
 % insert the table of contents
@@ -104,6 +103,8 @@ A \emph{.page} kiterjesztésű fájlok alkotják a generált weboldal gerincét.
 Praktikus szempontokból fontos, hogy minden oldalon ismétlődő részeket ne illesszünk be .page fájljainkba, hanem tároljuk őket külön a \emph{layout}ban vagy \emph{widget}ekben, elkerülve így a felesleges tartalomduplikálást.
 \subsection{Widgetek}
 Widgetek segítségével oldalunkat kisebb, önálló logikai egységekre tagolhatjuk, mely egységeket a \emph{layout} tetszőleges pontjára beilleszthetünk. Így lehetőség nyílik a gyakrabban használt oldalelemek duplikálásának elkerülésére. A widget fájlokban is használhatjuk a \ref{sec:format}. fejezetben ismertetett formázási lehetőségeket. A widget fájlokra fájlnevük alapján hivatkozhatunk, kiterjesztésük \emph{.widget}.
+
+
 \section{Formázás}
 \label{sec:format}
 Lehetőségünk van a generált HTML fájlok szövegformázására is, speciális HTML jelölők ismerete nélkül. Használatuk egyszerű; a megfelelő határolókarakterekkel kell körbevenni a szöveget a szövegkiemelés használatához. A \ref{table:textformat}. számú táblázat mutatja be a forrásfájlokban alkalmazható eszközök használatát és hatását.
@@ -122,6 +123,27 @@ Lehetőségünk van a generált HTML fájlok szövegformázására is, speciáli
   \end{center}
   \caption{Szövegformázás}
   \label{table:textformat}
+\end{table}
+
+\subsection{Címsorok}
+A szöveg jobb tagolása érdekében használhatunk címsorokat. Minden sor, melyet valamely címsor jelölő követ, második vagy harmadik szintű címsorrá alakul. (Az elsőrendű címsor a weboldal főcímének számára van fentartva) A ~\ref{table:headerformat}. táblázatban láthatóak a használható címsor jelölők.
+
+\begin{table}[h!]
+  \begin{center}
+    \begin{tabular}{| l | l |}
+    \hline
+    Forrás szöveg & Eredmény \\
+    \hline \hline
+    Főcím & Másodrendű címsor \\
+    === & ~ \\
+    \hline
+    Alcím & Harmadrendű címsor \\
+    -~-~- & ~ \\
+    \hline
+    \end{tabular}
+  \end{center}
+  \caption{Címsorok}
+  \label{table:headerformat}
 \end{table}
 
 \subsection{Linkek beszúrása}
