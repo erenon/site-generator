@@ -247,6 +247,53 @@ static void format_text_img(char **text) {
 	sfree(htmls);
 }
 
+static void format_text_header(char **text) {
+	char *h2 = "<h2>", *h2e = "</h2>";
+	char *h3 = "<h3>", *h3e = "</h3>";
+	char *ch = NULL, *che = NULL;
+	char *newtext = NULL;
+	int i, lastnl, addlen, tlen;
+	const int bblen = 4;
+
+	tlen = strlen(*text);
+	/*assuming the length of the header tags are the same*/
+	addlen = strlen(h2) + strlen(h2e) - bblen;
+
+	lastnl = 0;
+	for (i=0; i < tlen-3; i++) {
+		if (memcmp(*text+i, "\n===", bblen) == 0) {
+			ch = h2;
+			che = h2e;
+		} else if (memcmp(*text+i, "\n---", bblen) == 0){
+			ch = h3;
+			che = h3e;
+		}
+
+		if (ch != NULL && che != NULL) {
+			newtext = (char *)smalloc((tlen + addlen +1) * sizeof(char));
+			newtext[0] = '\0';
+
+			/*replace*/
+			strncat(newtext, *text, lastnl);
+			strcat(newtext, ch);
+			strncat(newtext, *text+lastnl, i-lastnl);
+			strcat(newtext, che);
+			strcat(newtext, *text+i+bblen);
+
+			sfree(*text);
+			*text = newtext;
+			newtext = NULL;
+
+			/*reset*/
+			ch = NULL;
+			che = NULL;
+			tlen = strlen(*text);
+		} else if ((*text)[i] == '\n') {
+			lastnl = i;
+		}
+	}
+}
+
 /**
  * Applies the available text format methods to
  * the given text.
@@ -258,6 +305,7 @@ static void format_text(char **text) {
 	format_text_bold(text);
 	format_text_link(text);
 	format_text_img(text);
+	format_text_header(text);
 }
 
 /**
